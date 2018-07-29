@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta name="format-detection" content="telephone=no" />
     <title>WebGL Browser Report - WebGL Fingerprinting - WebGL 2 Test</title>
-    <meta name="description" content="WebGL Browser Report checks WebGL support in your web browser, produce WebGL Device Fingerprinting, and shows the other WebGL and GPU capabilities more or less related web browser identity"/>
+    <meta name="description" content="WebGL Browser Report checks WebGL support in your web browser, produce WebGL Device Fingerprinting, and shows the other WebGL and GPU capabilities more or less related web browser identity"
+    />
     <link type="text/css" rel="stylesheet" media="all" href="/css/style.css" />
     <noscript>
         <style type="text/css">
@@ -20,17 +22,17 @@
         </style>
     </noscript>
     <script>
-    (function () { 
-    var a = '.noscript,.ns{display:none!important}.script{opacity:1}'
-        , b = document.head || document.getElementsByTagName('head')[0]
-        , c = document.createElement('style');
-    c.type = 'text/css';
-    c.styleSheet 
-        ? c.styleSheet.cssText = a 
-        : c.appendChild(document.createTextNode(a)); 
-    b.appendChild(c) 
-    })(); 
-    var glob = 1019849692, ping = "247171601"
+        (function () {
+            var a = '.noscript,.ns{display:none!important}.script{opacity:1}'
+                , b = document.head || document.getElementsByTagName('head')[0]
+                , c = document.createElement('style');
+            c.type = 'text/css';
+            c.styleSheet
+                ? c.styleSheet.cssText = a
+                : c.appendChild(document.createTextNode(a));
+            b.appendChild(c)
+        })();
+        var glob = 1019849692, ping = "247171601"
     </script>
     <script src="/js/jquery-1.12.4.min.js"></script>
     <script src="/js/plugins.js"></script>
@@ -61,7 +63,8 @@
             <tr style="border-top:1px #fff solid">
                 <td title="navigator.userAgent">Browser User-Agent</td>
                 <td>Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99
-                    Safari/537.36</td>
+                    Safari/537.36
+                </td>
             </tr>
         </table>
         <table class="webgl-table">
@@ -88,264 +91,351 @@
                 <tr>
                     <td>gl.copyBufferSubData</td>
                     <td id="n0"></td>
+                </tr>
                 <tr>
                     <td>gl.getBufferSubData</td>
                     <td id="n1"></td>
+                </tr>
                 <tr>
                     <td>gl.blitFramebuffer</td>
                     <td id="n2"></td>
+                </tr>
                 <tr>
                     <td>gl.framebufferTextureLayer</td>
                     <td id="n3"></td>
+                </tr>
                 <tr>
                     <td>gl.getInternalformatParameter</td>
                     <td id="n4"></td>
+                </tr>
                 <tr>
                     <td>gl.invalidateFramebuffer</td>
                     <td id="n5"></td>
+                </tr>
                 <tr>
                     <td>gl.invalidateSubFramebuffer</td>
                     <td id="n6"></td>
+                </tr>
                 <tr>
                     <td>gl.readBuffer</td>
                     <td id="n7"></td>
+                </tr>
                 <tr>
                     <td>gl.renderbufferStorageMultisample</td>
                     <td id="n8"></td>
+                </tr>
                 <tr>
                     <td>gl.texStorage2D</td>
                     <td id="n9"></td>
+                </tr>
                 <tr>
                     <td>gl.texStorage3D</td>
                     <td id="n10"></td>
+                </tr>
                 <tr>
                     <td>gl.texImage3D</td>
                     <td id="n11"></td>
+                </tr>
                 <tr>
                     <td>gl.texSubImage3D</td>
                     <td id="n12"></td>
+                </tr>
                 <tr>
                     <td>gl.copyTexSubImage3D</td>
                     <td id="n13"></td>
+                </tr>
                 <tr>
                     <td>gl.compressedTexImage3D</td>
                     <td id="n14"></td>
+                </tr>
                 <tr>
                     <td>gl.compressedTexSubImage3D</td>
                     <td id="n15"></td>
+                </tr>
                 <tr>
                     <td>gl.getFragDataLocation</td>
                     <td id="n16"></td>
+                </tr>
                 <tr>
                     <td>gl.uniform1ui</td>
                     <td id="n17"></td>
+                </tr>
                 <tr>
                     <td>gl.uniform2ui</td>
                     <td id="n18"></td>
+                </tr>
                 <tr>
                     <td>gl.uniform3ui</td>
                     <td id="n19"></td>
+                </tr>
                 <tr>
                     <td>gl.uniform4ui</td>
                     <td id="n20"></td>
+                </tr>
                 <tr>
                     <td>gl.uniform1uiv</td>
                     <td id="n21"></td>
+                </tr>
                 <tr>
                     <td>gl.uniform2uiv</td>
                     <td id="n22"></td>
+                </tr>
                 <tr>
                     <td>gl.uniform3uiv</td>
                     <td id="n23"></td>
+                </tr>
                 <tr>
                     <td>gl.uniform4uiv</td>
-                <td id="n24"></td>
+                    <td id="n24"></td>
+                </tr>
                 <tr>
                     <td>gl.uniformMatrix2x3fv</td>
                     <td id="n25"></td>
+                </tr>
                 <tr>
                     <td>gl.uniformMatrix3x2fv</td>
                     <td id="n26"></td>
+                </tr>
                 <tr>
                     <td>gl.uniformMatrix2x4fv</td>
                     <td id="n27"></td>
+                </tr>
                 <tr>
                     <td>gl.uniformMatrix4x2fv</td>
                     <td id="n28"></td>
+                </tr>
                 <tr>
                     <td>gl.uniformMatrix3x4fv</td>
                     <td id="n29"></td>
+                </tr>
                 <tr>
                     <td>gl.uniformMatrix4x3fv</td>
                     <td id="n30"></td>
+                </tr>
                 <tr>
                     <td>gl.vertexAttribI4i</td>
                     <td id="n31"></td>
+                </tr>
                 <tr>
                     <td>gl.vertexAttribI4iv</td>
                     <td id="n32"></td>
+                </tr>
                 <tr>
                     <td>gl.vertexAttribI4ui</td>
                     <td id="n33"></td>
+                </tr>
                 <tr>
                     <td>gl.vertexAttribI4uiv</td>
                     <td id="n34"></td>
+                </tr>
                 <tr>
                     <td>gl.vertexAttribIPointer</td>
                     <td id="n35"></td>
+                </tr>
                 <tr>
                     <td>gl.vertexAttribDivisor</td>
                     <td id="n36"></td>
+                </tr>
                 <tr>
                     <td>gl.drawArraysInstanced</td>
                     <td id="n37"></td>
+                </tr>
                 <tr>
                     <td>gl.drawElementsInstanced</td>
                     <td id="n38"></td>
+                </tr>
                 <tr>
                     <td>gl.drawRangeElements</td>
                     <td id="n39"></td>
+                </tr>
                 <tr>
                     <td>gl.drawBuffers</td>
                     <td id="n40"></td>
+                </tr>
                 <tr>
                     <td>gl.clearBufferiv</td>
                     <td id="n41"></td>
+                </tr>
                 <tr>
                     <td>gl.clearBufferuiv</td>
                     <td id="n42"></td>
+                </tr>
                 <tr>
                     <td>gl.clearBufferfv</td>
                     <td id="n43"></td>
+                </tr>
                 <tr>
                     <td>gl.clearBufferfi</td>
                     <td id="n44"></td>
+                </tr>
                 <tr>
                     <td>gl.createQuery</td>
                     <td id="n45"></td>
+                </tr>
                 <tr>
                     <td>gl.deleteQuery</td>
                     <td id="n46"></td>
+                </tr>
                 <tr>
                     <td>gl.isQuery</td>
                     <td id="n47"></td>
+                </tr>
                 <tr>
                     <td>gl.beginQuery</td>
                     <td id="n48"></td>
+                </tr>
                 <tr>
                     <td>gl.endQuery</td>
                     <td id="n49"></td>
+                </tr>
                 <tr>
                     <td>gl.getQuery</td>
                     <td id="n50"></td>
+                </tr>
                 <tr>
                     <td>gl.getQueryParameter</td>
                     <td id="n51"></td>
+                </tr>
                 <tr>
                     <td>gl.createSampler</td>
                     <td id="n52"></td>
+                </tr>
                 <tr>
                     <td>gl.deleteSampler</td>
                     <td id="n53"></td>
+                </tr>
                 <tr>
                     <td>gl.isSampler</td>
                     <td id="n54"></td>
+                </tr>
                 <tr>
                     <td>gl.bindSampler</td>
                     <td id="n55"></td>
+                </tr>
                 <tr>
                     <td>gl.samplerParameteri</td>
                     <td id="n56"></td>
+                </tr>
                 <tr>
                     <td>gl.samplerParameterf</td>
                     <td id="n57"></td>
+                </tr>
                 <tr>
                     <td>gl.getSamplerParameter</td>
                     <td id="n58"></td>
+                </tr>
                 <tr>
                     <td>gl.fenceSync</td>
                     <td id="n59"></td>
+                </tr>
                 <tr>
                     <td>gl.isSync</td>
                     <td id="n60"></td>
+                </tr>
                 <tr>
                     <td>gl.deleteSync</td>
                     <td id="n61"></td>
+                </tr>
                 <tr>
                     <td>gl.clientWaitSync</td>
                     <td id="n62"></td>
+                </tr>
                 <tr>
                     <td>gl.waitSync</td>
                     <td id="n63"></td>
+                </tr>
                 <tr>
-                    <td>gl.getSyncParameter</td> 
+                    <td>gl.getSyncParameter</td>
                     <td id="n64"></td>
+                </tr>
                 <tr>
                     <td>gl.createTransformFeedback</td>
                     <td id="n65"></td>
+                </tr>
                 <tr>
                     <td>gl.deleteTransformFeedback</td>
                     <td id="n66"></td>
+                </tr>
                 <tr>
                     <td>gl.isTransformFeedback</td>
                     <td id="n67"></td>
+                </tr>
                 <tr>
                     <td>gl.bindTransformFeedback</td>
                     <td id="n68"></td>
+                </tr>
                 <tr>
                     <td>gl.beginTransformFeedback</td>
                     <td id="n69"></td>
+                </tr>
                 <tr>
                     <td>gl.endTransformFeedback</td>
                     <td id="n70"></td>
+                </tr>
                 <tr>
                     <td>gl.transformFeedbackVaryings</td>
                     <td id="n71"></td>
+                </tr>
                 <tr>
                     <td>gl.getTransformFeedbackVarying</td>
                     <td id="n72"></td>
+                </tr>
                 <tr>
                     <td>gl.pauseTransformFeedback</td>
                     <td id="n73"></td>
+                </tr>
                 <tr>
                     <td>gl.resumeTransformFeedback</td>
                     <td id="n74"></td>
+                </tr>
                 <tr>
                     <td>gl.bindBufferBase</td>
                     <td id="n75"></td>
+                </tr>
                 <tr>
                     <td>gl.bindBufferRange</td>
                     <td id="n76"></td>
+                </tr>
                 <tr>
                     <td>gl.getIndexedParameter</td>
                     <td id="n77"></td>
+                </tr>
                 <tr>
                     <td>gl.getUniformIndices</td>
                     <td id="n78"></td>
+                </tr>
                 <tr>
                     <td>gl.getActiveUniforms</td>
                     <td id="n79"></td>
+                </tr>
                 <tr>
                     <td>gl.getUniformBlockIndex</td>
                     <td id="n80"></td>
+                </tr>
                 <tr>
                     <td>gl.getActiveUniformBlockParameter</td>
                     <td id="n81"></td>
+                </tr>
                 <tr>
                     <td>gl.getActiveUniformBlockName</td>
                     <td id="n82"></td>
+                </tr>
                 <tr>
                     <td>gl.uniformBlockBinding</td>
                     <td id="n83"></td>
+                </tr>
                 <tr>
                     <td>gl.createVertexArray</td>
                     <td id="n84"></td>
+                </tr>
                 <tr>
                     <td>gl.deleteVertexArray</td>
                     <td id="n85"></td>
+                </tr>
                 <tr>
                     <td>gl.isVertexArray</td>
                     <td id="n86"></td>
+                </tr>
                 <tr>
                     <td>gl.bindVertexArray</td>
                     <td id="n87"></td>
@@ -778,7 +868,8 @@
                             OES_EGL_image_external; WEBGL_debug; WEBGL_dynamic_texture; WEBGL_multiview; WEBGL_subarray_uploads;
                             OES_depth24; WEBGL_debug_shader_precision; WEBGL_draw_elements_no_range_check; WEBGL_subscribe_uniform;
                             WEBGL_texture_from_depth_video; WEBGL_compressed_texture_es3; WEBGL_compressed_texture_astc_ldr;
-                            EXT_draw_buffers}</em>
+                            EXT_draw_buffers}
+                        </em>
                     </td>
                 </tr>
             </tbody>
@@ -786,4 +877,5 @@
         <script src="/js/webgl.js"></script>
     </div>
 </body>
+
 </html>
