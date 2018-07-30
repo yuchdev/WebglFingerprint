@@ -472,13 +472,6 @@ $(function () {
         }
     }
 
-    function b(a) {
-        var b = "", c = $("#howto-enable-disable-webgl").next();
-        c.children("dl").each(function () {
-            $(this).attr("id") == "webgl-howto-" + a ? b = "<dl>" + $(this).html() + "</dl>" + b : b += "<dl>" + $(this).html() + "</dl>"
-        }), c.html(b)
-    }
-
     function c(a) {
         if (a) var b = [a]; else var b = ["webgl2", "experimental-webgl2", "webgl", "experimental-webgl", "moz-webgl", "fake-webgl"];
         var c = [], d = !1, e = !1;
@@ -666,7 +659,11 @@ $(function () {
 
             try {
                 var j = new Uint8Array(131072);
-                if (a.readPixels(0, 0, 256, 128, a.RGBA, a.UNSIGNED_BYTE, j), i = JSON.stringify(j).replace(/,?"[0-9]+":/g, ""), "" == i.replace(/^{[0]+}$/g, "")) {
+
+                if (a.readPixels(0, 0, 256, 128, a.RGBA, a.UNSIGNED_BYTE, j),
+                    i = JSON.stringify(j).replace(/,?"[0-9]+":/g, ""),
+                    "" == i.replace(/^{[0]+}$/g, "")) {
+
                     throw "JSON.stringify only ZEROes";
                 }
 
@@ -675,11 +672,8 @@ $(function () {
             catch (a) {
                 q && console.warn("WebGL Image readPixels Hash", a), i = "n/a"
             }
-            $("#webgl-fp-img").text(i)
+
+            $("#webgl-fp-img").text(i);
         }, 1)
-    }() , void 0 !== window.chrome
-        ? b("chrome")
-        : navigator.userAgent.indexOf("Safari/") > -1
-            ? b("safari")
-            : (document.documentMode || navigator.userAgent.indexOf("Edge") > -1) && b("msie")
-});
+    }
+()});
