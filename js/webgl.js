@@ -170,6 +170,7 @@
             return (msw << 16) | (lsw & 0xFFFF)
         }
     }
+
     return md5
 }));
 
@@ -311,14 +312,17 @@ $(function () {
                     , "createVertexArray"
                     , "deleteVertexArray"
                     , "isVertexArray"
-                    , "bindVertexArray"]
-                         , E = 0, z = 0; z < 88; z++) {
+                    , "bindVertexArray"], E = 0, z = 0; z < D.length; z++) {
 
                     var F = D[z], G = $("#n" + z);
                     C[F] ? (E++, G.html(r + "True")) : G.html(s + "False")
                 }
 
-                E > 0 && (webgl2_support_functions = " (" + E + ' of 88 new functions implemented) <input type="button" value="more" />')
+                E > 0 && (webgl2_support_functions = " ("
+                    + E
+                    + ' of '
+                    + D.length
+                    + ' new functions implemented) <input type="button" value="more" />')
             }
 
             if (0 == b) {
