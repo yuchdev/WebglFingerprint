@@ -3,48 +3,58 @@ $(function () {
 
     function a(b, m) {
 
-        if (q) {
+        if (DEBUG) {
             var n = performance.now();
         }
 
         // if b is undefined
         if(void 0 === b) {
-            b = !1;
+            b = false;
         }
 
         var u = 0, v = 0;
 
-        window.WebGLRenderingContext && (u = 1), window.WebGL2RenderingContext && (v = 1);
-        var w = !!window.WebGL2RenderingContext, x = c(b);
+        if (window.WebGLRenderingContext){
+            u = 1;
+        }
+        if (window.WebGL2RenderingContext){
+            v = 1;
+        }
+        var w = !!window.WebGL2RenderingContext,
+            x = c(b);
 
         if (!b)
             var m = x.name;
 
         if (1 != u || x || (u = 2), 1 == v) {
-            var y = !1;
+            var y = false;
             for (var z in m) {
                 "2" == m[z].slice(-1) && (y = !0);
                 y || (v = 2)
             }
         }
 
-        var A = !1;
-        if (q) {
+        var A = false;
+        if (DEBUG) {
             var B = performance.now();
-            console.log("t2 - t1", B - n)
+            console.log("t2 - t1", B - n);
         }
 
         if (x) {
             var C = x.gl;
             if ("2" == x.name[0].slice(-1)) {
-                A = 2, $("#webgl-table tbody.w2").removeClass("n"), $("#webgl-table tbody.w1").addClass("n");
+                A = 2;
+                $("#webgl-table tbody.w2").removeClass("n");
+                $("#webgl-table tbody.w1").addClass("n");
             }
             else {
                 if ("fake-webgl" == x.name[0] || "function" != typeof C.getParameter && "object" != typeof C.getParameter) {
                     var u = 3;
-                    return !1
+                    return false
                 }
-                A = 1, $("#webgl-table tbody.w1").removeClass("n"), $("#webgl-table tbody.w2").addClass("n")
+                A = 1;
+                $("#webgl-table tbody.w1").removeClass("n");
+                $("#webgl-table tbody.w2").addClass("n");
             }
 
             if (w && "" == webgl2_support_functions && 2 == A) {
@@ -138,15 +148,23 @@ $(function () {
                     , "isVertexArray"
                     , "bindVertexArray"], E = 0, z = 0; z < D.length; z++) {
 
-                    var F = D[z], G = $("#n" + z);
-                    C[F] ? (E++, G.html(r + "True")) : G.html(s + "False")
+                    var F = D[z],
+                        G = $("#n" + z);
+                    if (C[F]){
+                        E++;
+                        G.html(r + "True");
+                    } else {
+                        G.html(s + "False")
+                    }
                 }
 
-                E > 0 && (webgl2_support_functions = " ("
-                    + E
-                    + ' of '
-                    + D.length
-                    + ' new functions implemented) <input type="button" value="more" />')
+                if (E > 0) {
+                    webgl2_support_functions = " ("
+                        + E
+                        + ' of '
+                        + D.length
+                        + ' new functions implemented) <input type="button" value="more" />';
+                }
             }
 
             if (0 == b) {
@@ -156,7 +174,7 @@ $(function () {
                 })
             }
 
-            if (q) {
+            if (DEBUG) {
                 var I = performance.now();
                 console.log("t3-t2", I - B)
             }
@@ -225,8 +243,8 @@ $(function () {
                 "" != N && (N += ", "), m[z] != x.name[0] ? N += '<span class="href" id="switch-' + m[z] + '" title="switch to &quot;' + m[z] + '&quot;">' : m.length > 1 && (N += "<strong>"), N += m[z], m[z] != x.name[0] ? N += "</span>" : m.length > 1 && (N += "</strong>");
             }
 
-
-            if ($("#f_name").html(N), q) {
+            $("#f_name").html(N);
+            if (DEBUG) {
                 var O = performance.now();
                 console.log("t4-t3", O - I)
             }
@@ -273,7 +291,7 @@ $(function () {
         else
             $("#webgl-table").removeClass("script").addClass("opac"), $("#webgl-table em.ns").removeClass("ns");
 
-        if (q) {
+        if (DEBUG) {
             var Q = performance.now();
             console.log("t5-t4", Q - O)
         }
@@ -290,21 +308,39 @@ $(function () {
             }).parent().addClass("webgl2-more-func")
         }
 
-        if (q) {
+        if (DEBUG) {
             var T = performance.now();
             console.log("t6-t5", T - Q), console.log("total", T - n, "ms")
         }
     }
 
     function c(a) {
-        if (a) var b = [a]; else var b = ["webgl2", "experimental-webgl2", "webgl", "experimental-webgl", "moz-webgl", "fake-webgl"];
-        var c = [], d = !1, e = !1;
+        if (a) 
+            var b = [a]; 
+        else 
+            var b = ["webgl2", "experimental-webgl2", "webgl", "experimental-webgl", "moz-webgl", "fake-webgl"];
+
+        var c = [],
+            d = false, 
+            e = false;
+
         for (var f in b) {
-            e = !1;
+            e = false;
             try {
-                e = document.createElement("canvas").getContext(b[f], {stencil: !0}), e && (d ? p(e) : d = e, c.push(b[f]))
-            } catch (a) {
-                q && console.warn("webgl_detect", a)
+                e = document.createElement("canvas")
+                            .getContext(b[f], {stencil: true});
+                if (e){
+                    if (d) {
+                        p(e);
+                    } else {
+                        d = e;
+                        c.push(b[f]);
+                    }
+                }
+            } catch (exc) {
+                if (DEBUG) {
+                    console.warn("webgl_detect", exc);
+                }
             }
         }
         return !!d && {name: c, gl: d}
@@ -315,11 +351,13 @@ $(function () {
     }
 
     function e(a) {
-        var b = !1;
+        var b = false;
         try {
             b = a.getContextAttributes().antialias
-        } catch (a) {
-            q && console.warn("getAntialiasing", a)
+        } catch (exc) {
+            if (DEBUG) {
+                console.warn("getAntialiasing", exc);
+            }
         }
         return b ? "True" : "False"
     }
@@ -351,10 +389,24 @@ $(function () {
     function i(a) {
         try {
             var b = $("<canvas />", {width: "1", height: "1"}).appendTo("body"),
-                c = b[0].getContext(a, {failIfMajorPerformanceCaveat: !0});
-            return b.remove(), c ? void 0 === c.getContextAttributes().failIfMajorPerformanceCaveat ? (p(c), "Not implemented") : (p(c), "False") : "True"
-        } catch (a) {
-            return q && console.warn("getMajorPerformanceCaveat", a), "n/a"
+                c = b[0].getContext(a, {failIfMajorPerformanceCaveat: true});
+            b.remove();
+            if (c) {
+                if (void 0 === c.getContextAttributes().failIfMajorPerformanceCaveat) {
+                    p(c);
+                    return "Not implemented";
+                } else {
+                    p(c);
+                    return "False";
+                }
+            } else {
+                return "True";
+            }
+        } catch (exc) {
+            if (DEBUG) {
+                console.warn("getMajorPerformanceCaveat", exc);
+            }
+            return "n/a";
         }
     }
 
@@ -368,8 +420,11 @@ $(function () {
             var b = a.getShaderPrecisionFormat(a.FRAGMENT_SHADER, a.HIGH_FLOAT),
                 c = 0 !== b.precision ? "highp/" : "mediump/";
             return b = a.getShaderPrecisionFormat(a.FRAGMENT_SHADER, a.HIGH_INT), c += 0 !== b.rangeMax ? "highp" : "lowp"
-        } catch (a) {
-            return q && console.warn("getFloatIntPrecision", a), "n/a"
+        } catch (exc) {
+            if (DEBUG) {
+                console.warn("getFloatIntPrecision", ctx);
+            }
+            return "n/a";
         }
     }
 
@@ -377,10 +432,13 @@ $(function () {
         var b = [];
         try {
             b = a.getSupportedExtensions()
-        } catch (a) {
-            q && console.warn("getWebGLExtensionsWithLinks", a)
+        } catch (exc) {
+            if (DEBUG) {
+                console.warn("getWebGLExtensionsWithLinks", exc);
+            }
         }
-        var c = "<tr><td>Supported WebGL Extensions</td>", d = [];
+        var c = "<tr><td>Supported WebGL Extensions</td>", 
+            d = [];
         if (void 0 !== b && b.length) {
             for (var e = 0, f = b.length; e < f; e++) "WEBGL_debug_renderer_info" != b[e] && "WEBGL_debug_shaders" != b[e] ? (e > 0 && (c += '<tr><td class="nt"></td>'), c += '<td class="ext-link"><span class="href">' + b[e] + "</span></td></tr>") : d.push(b[e]);
             if (c += "<tr><td>Supported Privileged Extensions</td>", d.length > 0) for (var e in d) e > 0 && (c += '<tr><td class="nt"></td>'), c += '<td class="ext-link"><span class="href">' + d[e] + "</span></td></tr>"; else c += "<td>n/a</td></tr>"
@@ -401,9 +459,12 @@ $(function () {
         try {
             var c = a.getShaderPrecisionFormat(b, a.HIGH_FLOAT), d = a.getShaderPrecisionFormat(b, a.MEDIUM_FLOAT),
                 e = a.getShaderPrecisionFormat(b, a.LOW_FLOAT), f = c;
-            return 0 === c.precision && (f = d), '<span title="High: ' + n(c, !0) + "\n\nMedium: " + n(d, !0) + "\n\nLow: " + n(e, !0) + '">' + n(f, !1) + "</span>"
-        } catch (a) {
-            return q && console.warn("describePrecision", a), "n/a"
+            return 0 === c.precision && (f = d), '<span title="High: ' + n(c, !0) + "\n\nMedium: " + n(d, !0) + "\n\nLow: " + n(e, !0) + '">' + n(f, false) + "</span>"
+        } catch (exc) {
+            if (DEBUG) {
+                console.warn("describePrecision", exc);
+            }
+            return "n/a";
         }
     }
 
@@ -411,93 +472,124 @@ $(function () {
         try {
             var b = a.getExtension("WEBGL_lose_context") || a.getExtension("WEBKIT_WEBGL_lose_context") || a.getExtension("MOZ_WEBGL_lose_context");
             null != b && b.loseContext()
-        } catch (a) {
-            q && console.warn("lose_context", a)
+        } catch (exc) {
+            if (DEBUG) {
+                console.warn("lose_context", exc);
+            }
         }
     }
 
-    var q = !1
-        , r = '<span class="good">&#10004;</span>'
-        , s = '<span class="bad">&#215;</span>'
-        , t = [
+    var DEBUG = false, 
+        r = '<span class="good">&#10004;</span>',
+        s = '<span class="bad">&#215;</span>', 
+        t = [
             s + "False",
             r + "True",
             s + "False (supported, but disabled in browser settings, or blocked by extensions)",
-            s + "False (supported, but blocked by browser extensions)"];
+            s + "False (supported, but blocked by browser extensions)"
+        ],
+        webgl2_support_functions = "";
 
-    webgl2_support_functions = "", a() , function () {
-
+    a();
+    (function () {
         setTimeout(function () {
-            var a;
+            var canvas, ctx, width = 256, height = 128;  // var a;
             try {
-                var b = document.createElement("canvas");
-                b.width = 256,
-                    b.height = 128,
-                    a = b.getContext("webgl2")
-                        || b.getContext("experimental-webgl2")
-                        || b.getContext("webgl")
-                        || b.getContext("experimental-webgl")
-                        || b.getContext("moz-webgl");
+                canvas = document.createElement("canvas");  // var b = document.createElement("canvas");
+                canvas.width = width;
+                canvas.height = height;
+                ctx = canvas.getContext("webgl2")
+                    || canvas.getContext("experimental-webgl2")
+                    || canvas.getContext("webgl")
+                    || canvas.getContext("experimental-webgl")
+                    || canvas.getContext("moz-webgl");
             }
-            catch (a) {
-                q && console.warn("WebGL Image Hash", a)
+            catch (exc) {
+                if (DEBUG){
+                    console.warn("WebGL Image Hash", exc);
+                }
             }
 
-            if (null == a){
-                return !1;
+            if (ctx === null){
+                return false;
             }
 
             var c = document.getElementById("webgl-table").innerHTML;
-            $("#hash").text(c), c = md5(c), $("#webgl-fp-context").addClass("mono upper").text(c);
+            $("#hash").text(c);
+            c = md5(c);
+            $("#webgl-fp-context").addClass("mono upper").text(c);
+
             try {
-                var d = a.createBuffer();
-                a.bindBuffer(a.ARRAY_BUFFER, d);
+                var d = ctx.createBuffer();
+                ctx.bindBuffer(ctx.ARRAY_BUFFER, d);
                 var e = new Float32Array([-.2, -.9, 0, .4, -.26, 0, 0, .7321, 0]);
-                a.bufferData(a.ARRAY_BUFFER, e, a.STATIC_DRAW), d.itemSize = 3, d.numItems = 3;
-                var f = a.createProgram(), g = a.createShader(a.VERTEX_SHADER);
-                a.shaderSource(g, "attribute vec2 attrVertex;varying vec2 varyinTexCoordinate;uniform\
-                    vec2 uniformOffset;void main(){varyinTexCoordinate=attrVertex+uniformOffset;\
-                    gl_Position=vec4(attrVertex,0,1);}"), a.compileShader(g);
+                ctx.bufferData(ctx.ARRAY_BUFFER, e, ctx.STATIC_DRAW);
+                d.itemSize = 3;
+                d.numItems = 3;
+                
+                var f = ctx.createProgram(),
+                    vtx_shader = ctx.createShader(ctx.VERTEX_SHADER);
 
-                var h = a.createShader(a.FRAGMENT_SHADER);
-                a.shaderSource(h, "precision mediump float;varying vec2 varyinTexCoordinate;void main()\
-                    {gl_FragColor=vec4(varyinTexCoordinate,0,1);}"),
-                    a.compileShader(h),
-                    a.attachShader(f, g),
-                    a.attachShader(f, h),
-                    a.linkProgram(f),
-                    a.useProgram(f),
-                    f.vertexPosAttrib = a.getAttribLocation(f, "attrVertex"),
-                    f.offsetUniform = a.getUniformLocation(f, "uniformOffset"),
-                    a.enableVertexAttribArray(f.vertexPosArray),
-                    a.vertexAttribPointer(f.vertexPosAttrib, d.itemSize, a.FLOAT, !1, 0, 0),
-                    a.uniform2f(f.offsetUniform, 1, 1),
-                    a.drawArrays(a.TRIANGLE_STRIP, 0, d.numItems),
-                    $(b).prependTo("#webgl-img");
+                ctx.shaderSource(vtx_shader, 
+                    "attribute vec2 attrVertex;" +
+                    "varying vec2 varyinTexCoordinate;" +
+                    "uniform vec2 uniformOffset;" +
+                    "void main(){"+
+                    "    varyinTexCoordinate = attrVertex + uniformOffset;" +
+                    "    gl_Position = vec4(attrVertex, 0, 1);" + 
+                    "}"
+                );
+                ctx.compileShader(vtx_shader);
+
+                var frag_shader = ctx.createShader(ctx.FRAGMENT_SHADER);
+                ctx.shaderSource(frag_shader, 
+                    "precision mediump float;" + 
+                    "varying vec2 varyinTexCoordinate;" +
+                    "void main(){" + 
+                    "    gl_FragColor = vec4(varyinTexCoordinate, 0, 1);" +
+                    "}"
+                );
+                ctx.compileShader(frag_shader);
+                ctx.attachShader(f, vtx_shader);
+                ctx.attachShader(f, frag_shader);
+                ctx.linkProgram(f);
+                ctx.useProgram(f);
+                f.vertexPosAttrib = ctx.getAttribLocation(f, "attrVertex");
+                f.offsetUniform = ctx.getUniformLocation(f, "uniformOffset");
+                ctx.enableVertexAttribArray(f.vertexPosArray);
+                ctx.vertexAttribPointer(f.vertexPosAttrib, d.itemSize, ctx.FLOAT, false, 0, 0);
+                ctx.uniform2f(f.offsetUniform, 1, 1);
+                ctx.drawArrays(ctx.TRIANGLE_STRIP, 0, d.numItems);
+                $(canvas).prependTo("#webgl-img");
             }
-            catch (a) {
-                q && console.warn("Draw WebGL Image", a), $("#webgl-img").text("n/a");
+            catch (exc) {
+                if (DEBUG){
+                    console.warn("Draw WebGL Image", exc);
+                    $("#webgl-img").text("n/a");
+                }
             }
 
-            var i = "";
+            var img_fingerprint = "";
 
             try {
                 var j = new Uint8Array(131072);
-
-                if (a.readPixels(0, 0, 256, 128, a.RGBA, a.UNSIGNED_BYTE, j),
-                    i = JSON.stringify(j).replace(/,?"[0-9]+":/g, ""),
-                    "" == i.replace(/^{[0]+}$/g, "")) {
-
+                ctx.readPixels(0, 0, 256, 128, ctx.RGBA, ctx.UNSIGNED_BYTE, j);
+                img_fingerprint = JSON.stringify(j).replace(/,?"[0-9]+":/g, "");
+                if (img_fingerprint.replace(/^{[0]+}$/g, "") == "") {
                     throw "JSON.stringify only ZEROes";
                 }
 
-                i = md5(i), $("#webgl-fp-img").addClass("mono upper")
+                img_fingerprint = md5(img_fingerprint);
+                $("#webgl-fp-img").addClass("mono upper");
             }
-            catch (a) {
-                q && console.warn("WebGL Image readPixels Hash", a), i = "n/a"
+            catch (exc) {
+                if (DEBUG) {
+                    console.warn("WebGL Image readPixels Hash", exc);
+                    img_fingerprint = "n/a";
+                }
             }
 
-            $("#webgl-fp-img").text(i);
-        }, 1)
-    }
-()});
+            $("#webgl-fp-img").text(img_fingerprint);
+        }, 1);
+    })();
+});
