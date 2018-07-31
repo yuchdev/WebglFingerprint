@@ -3,10 +3,10 @@ $(function () {
 
     "use strict";
 
-    ///
-    /// webgl_implementation
-    /// supported_webgl_implementations
-    function render_webgl_table(webgl_implementation, supported_webgl_implementations) {
+    /// @function: renderWebglTable
+    /// @param: webgl_implementation
+    /// @param: supported_webgl_implementations
+    function renderWebglTable(webgl_implementation, supported_webgl_implementations) {
 
         if (DEBUG) {
             var t1 = performance.now();
@@ -246,6 +246,7 @@ $(function () {
             }
 
             for (var webg_param_index in webgl_params) {
+
                 var webgl_param_value = "";
                 if (webgl_params[webg_param_index] instanceof Array) {
                     for (var M in webgl_params[webg_param_index]){
@@ -306,14 +307,15 @@ $(function () {
                 $("#switch-" + supported_webgl_implementations[i]).click(function (event) {
                     event.preventDefault();
                     $(this).off("click");
-                    render_webgl_table($(this).attr("id").slice(7), supported_webgl_implementations);
+                    renderWebglTable($(this).attr("id").slice(7), supported_webgl_implementations);
                 });
             }
 
             $("#f_alias").text(getAntialiasing(webglRenderContext));
-            var P = f(webglRenderContext);
-            $("#u_vendor").html(P.vendor)
-                , $("#u_renderer").html(P.renderer)
+            var debug_renderer_info = debugRendererInfo(webglRenderContext);
+
+            $("#u_vendor").html(debug_renderer_info.vendor)
+                , $("#u_renderer").html(debug_renderer_info.renderer)
                 , $("#f_angle").text(getANGLE(webglRenderContext))
                 , $("#f_anisotropy").text(getAnisotropy(webglRenderContext))
                 , $("#f_caveat").text(getMajorPerformanceCaveat(x.name[0]))
@@ -431,7 +433,7 @@ $(function () {
         return b ? "True" : "False"
     }
 
-    function f(a) {
+    function debugRendererInfo(a) {
         var b = '<span class="bad">!</span> ', 
             c = {renderer: "n/a", vendor: "n/a"},
             d = a.getExtension("WEBGL_debug_renderer_info");
@@ -571,7 +573,8 @@ $(function () {
                 label = med;
             }
             return '<span title="High: ' + render_range(high, true) + "\n\nMedium: " + render_range(med, true) + "\n\nLow: " + render_range(low, true) + '">' + render_range(label, false) + "</span>";
-        } catch (exc) {
+        }
+        catch (exc) {
             if (DEBUG) {
                 console.warn("describePrecision", exc);
             }
@@ -587,7 +590,8 @@ $(function () {
             if (lc_ext !== null) {
                 lc_ext.loseContext();
             }
-        } catch (exc) {
+        }
+        catch (exc) {
             if (DEBUG) {
                 console.warn("lose_context", exc);
             }
@@ -606,7 +610,7 @@ $(function () {
         ],
         webgl2_support_functions = "";
 
-    render_webgl_table();
+    renderWebglTable();
     (function () {
         setTimeout(function () {
             var canvas, ctx, width = 256, height = 128;  // var a;
