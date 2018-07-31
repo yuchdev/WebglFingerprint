@@ -1,15 +1,16 @@
 /* WebGL */
 $(function () {
 
-    function a(b, m) {
-
+    function render_webgl_table(webgl_implementation, supported_webgl_implementations) {
+        // b -> webgl_implementation
+        // m -> supported_webgl_implementations
         if (DEBUG) {
             var n = performance.now();
         }
 
         // if b is undefined
-        if(void 0 === b) {
-            b = false;
+        if (webgl_implementation === undefined) {
+            webgl_implementation = false;
         }
 
         var u = 0, v = 0;
@@ -21,16 +22,23 @@ $(function () {
             v = 1;
         }
         var w = !!window.WebGL2RenderingContext,
-            x = c(b);
+            x = webgl_detect(webgl_implementation);
 
-        if (!b)
-            var m = x.name;
+        if (!webgl_implementation) {
+            // var m = x.name;
+            supported_webgl_implementations = x.name;
+        }
 
         if (1 != u || x || (u = 2), 1 == v) {
             var y = false;
-            for (var z in m) {
-                "2" == m[z].slice(-1) && (y = !0);
-                y || (v = 2)
+            for (var i in supported_webgl_implementations) {
+                // Поддерживается ли 2-ая версия webgl/experimental-webgl
+                if (supported_webgl_implementations[i].slice(-1) == "2") {
+                    y = true;
+                }
+                if (!y){
+                    v = 2;
+                }
             }
         }
 
@@ -152,9 +160,9 @@ $(function () {
                         G = $("#n" + z);
                     if (C[F]){
                         E++;
-                        G.html(r + "True");
+                        G.html(icon_supported + "True");
                     } else {
-                        G.html(s + "False")
+                        G.html(icon_unsupported + "False")
                     }
                 }
 
@@ -167,10 +175,13 @@ $(function () {
                 }
             }
 
-            if (0 == b) {
+            if (webgl_implementation == false) {
                 var H;
                 $("#webgl-table td:nth-child(2)").each(function (a) {
-                    H = $(this).text(), H.length && "n/a" != H && $(this).prev().attr("title", H)
+                    H = $(this).text();
+                    if (H.length && "n/a" != H){
+                        $(this).prev().attr("title", H);
+                    }
                 })
             }
 
@@ -239,8 +250,21 @@ $(function () {
             }
 
             var N = "";
-            for (var z in m) {
-                "" != N && (N += ", "), m[z] != x.name[0] ? N += '<span class="href" id="switch-' + m[z] + '" title="switch to &quot;' + m[z] + '&quot;">' : m.length > 1 && (N += "<strong>"), N += m[z], m[z] != x.name[0] ? N += "</span>" : m.length > 1 && (N += "</strong>");
+            for (var i in supported_webgl_implementations) {
+                if ("" != N){
+                    N += ", ";
+                }
+                if (supported_webgl_implementations[i] != x.name[0]) {
+                    N += '<span class="href" id="switch-' + supported_webgl_implementations[i] + '" title="switch to &quot;' + supported_webgl_implementations[i] + '&quot;">';
+                } else if (supported_webgl_implementations.length > 1) {
+                    N += "<strong>";
+                }
+                N += supported_webgl_implementations[i];
+                if (supported_webgl_implementations[i] != x.name[0]) {
+                    N += "</span>";
+                } else if (supported_webgl_implementations.length > 1) {
+                    N += "</strong>";
+                }
             }
 
             $("#f_name").html(N);
@@ -249,24 +273,26 @@ $(function () {
                 console.log("t4-t3", O - I)
             }
 
-            for (var z in m) {
-                $("#switch-" + m[z]).click(function (b) {
-                    b.preventDefault(), $(this).off("click"), a($(this).attr("id").slice(7), m)
+            for (var i in supported_webgl_implementations) {
+                $("#switch-" + supported_webgl_implementations[i]).click(function (event) {
+                    event.preventDefault();
+                    $(this).off("click");
+                    render_webgl_table($(this).attr("id").slice(7), supported_webgl_implementations);
                 });
             }
 
-            $("#f_alias").text(e(C));
+            $("#f_alias").text(getAntialiasing(C));
             var P = f(C);
             $("#u_vendor").html(P.vendor)
                 , $("#u_renderer").html(P.renderer)
-                , $("#f_angle").text(g(C))
-                , $("#f_anisotropy").text(h(C))
-                , $("#f_caveat").text(i(x.name[0]))
-                , 1 == A && $("#f_max_draw_buffers").text(j(C))
-                , $("#f_float_int").text(k(C))
-                , $("#f_ext").html(l(C))
-                , $("#f_vertext").html(o(C, C.VERTEX_SHADER))
-                , $("#f_fragment").html(o(C, C.FRAGMENT_SHADER))
+                , $("#f_angle").text(getANGLE(C))
+                , $("#f_anisotropy").text(getAnisotropy(C))
+                , $("#f_caveat").text(getMajorPerformanceCaveat(x.name[0]))
+                , 1 == A && $("#f_max_draw_buffers").text(getMaxDrawBuffers(C))
+                , $("#f_float_int").text(getFloatIntPrecision(C))
+                , $("#f_ext").html(getWebGLExtensionsWithLinks(C))
+                , $("#f_vertext").html(describePrecision(C, C.VERTEX_SHADER))
+                , $("#f_fragment").html(describePrecision(C, C.FRAGMENT_SHADER))
                 , $(".ext-link").each(function () {
                 $(this).on("mouseover", function () {
                     $(this).off();
@@ -284,58 +310,68 @@ $(function () {
                         + a
                         + "</a>")
                 })
-            }), window.location.hash && !b && clck(), 1 == A
+                }), window.location.hash && !webgl_implementation && clck(), 1 == A
                 ? $(".w1").addClass("w1only")
-                : 2 == A && $(".w2").addClass("w2only"), p(C)
+                : 2 == A && $(".w2").addClass("w2only"), destroy_webgl(C)
         }
-        else
-            $("#webgl-table").removeClass("script").addClass("opac"), $("#webgl-table em.ns").removeClass("ns");
+        else {
+            $("#webgl-table").removeClass("script").addClass("opac");
+            $("#webgl-table em.ns").removeClass("ns");
+        }
 
         if (DEBUG) {
             var Q = performance.now();
-            console.log("t5-t4", Q - O)
+            console.log("t5-t4", Q - O);
         }
 
-        if ($("#webgl1-status").html(t[u])
-            , $("#webgl2-status").html(t[v] + (1 == v ? webgl2_support_functions : ""))
-            , A && "" != webgl2_support_functions) {
-
-            var R = $("#webgl2-status input"), S = $("#webgl2-tbody");
+        $("#webgl1-status").html(html_value_map[u]);
+        $("#webgl2-status").html(html_value_map[v] + (1 == v ? webgl2_support_functions : ""));
+        if (A && "" != webgl2_support_functions) {
+            var R = $("#webgl2-status input"),
+                S = $("#webgl2-tbody");
             R.click(function (a) {
-                "more" == R.attr("value")
-                    ? (R.attr("value", "less"), S.removeClass("n"))
-                    : (R.attr("value", "more"), S.addClass("n"))
-            }).parent().addClass("webgl2-more-func")
+                if (R.attr("value") == "more") {
+                    R.attr("value", "less");
+                    S.removeClass("n");
+                } else {
+                    R.attr("value", "more");
+                    S.addClass("n");
+                }
+            }).parent().addClass("webgl2-more-func");
         }
 
         if (DEBUG) {
             var T = performance.now();
-            console.log("t6-t5", T - Q), console.log("total", T - n, "ms")
+            console.log("t6-t5", T - Q);
+            console.log("total", T - n, "ms");
         }
     }
 
-    function c(a) {
-        if (a) 
-            var b = [a]; 
+    function webgl_detect(webgl_implementation) {
+        if (webgl_implementation) 
+            var gl_implementations = [webgl_implementation];
         else 
-            var b = ["webgl2", "experimental-webgl2", "webgl", "experimental-webgl", "moz-webgl", "fake-webgl"];
+            var gl_implementations = [
+                "webgl2", "experimental-webgl2", "webgl", "experimental-webgl", 
+                "moz-webgl", "fake-webgl"
+            ];
 
-        var c = [],
-            d = false, 
-            e = false;
+        var supported_implementations = [],
+            ctx = false, 
+            impl_ctx = false;
 
-        for (var f in b) {
-            e = false;
+        for (var index in gl_implementations) {
+            impl_ctx = false;
             try {
-                e = document.createElement("canvas")
-                            .getContext(b[f], {stencil: true});
-                if (e){
-                    if (d) {
-                        p(e);
+                impl_ctx = document.createElement("canvas")
+                                   .getContext(gl_implementations[index], {stencil: true});
+                if (impl_ctx){
+                    if (ctx) {
+                        destroy_webgl(impl_ctx);
                     } else {
-                        d = e;
-                        c.push(b[f]);
+                        ctx = impl_ctx;
                     }
+                    supported_implementations.push(gl_implementations[index]);
                 }
             } catch (exc) {
                 if (DEBUG) {
@@ -343,14 +379,14 @@ $(function () {
                 }
             }
         }
-        return !!d && {name: c, gl: d}
+        return !!ctx && { name: supported_implementations, gl: ctx}
     }
 
     function d(a) {
         return null == a ? "null" : "[" + a[0] + ", " + a[1] + "]"
     }
 
-    function e(a) {
+    function getAntialiasing(a) {
         var b = false;
         try {
             b = a.getContextAttributes().antialias
@@ -363,12 +399,14 @@ $(function () {
     }
 
     function f(a) {
-        var b = '<span class="bad">!</span> ', c = {renderer: "n/a", vendor: "n/a"},
+        var b = '<span class="bad">!</span> ', 
+            c = {renderer: "n/a", vendor: "n/a"},
             d = a.getExtension("WEBGL_debug_renderer_info");
         return null != d && (c.renderer = b + a.getParameter(d.UNMASKED_RENDERER_WEBGL), c.vendor = b + a.getParameter(d.UNMASKED_VENDOR_WEBGL)), c
     }
 
-    function g(a) {
+    function getANGLE(a) {
+        // ANGLE - Almost Native Graphics Layer Engine
         function b(a) {
             return 0 !== a && 0 == (a & a - 1)
         }
@@ -377,26 +415,28 @@ $(function () {
         return "Win32" !== navigator.platform && "Win64" !== navigator.platform || "Internet Explorer" === a.getParameter(a.RENDERER) || "Microsoft Edge" === a.getParameter(a.RENDERER) || c !== d([1, 1]) ? "False" : b(a.getParameter(a.MAX_VERTEX_UNIFORM_VECTORS)) && b(a.getParameter(a.MAX_FRAGMENT_UNIFORM_VECTORS)) ? "True, Direct3D 11" : "True, Direct3D 9"
     }
 
-    function h(a) {
-        var b = a.getExtension("EXT_texture_filter_anisotropic") || a.getExtension("WEBKIT_EXT_texture_filter_anisotropic") || a.getExtension("MOZ_EXT_texture_filter_anisotropic");
+    function getAnisotropy(gl) {
+        var b = gl.getExtension("EXT_texture_filter_anisotropic")
+                || gl.getExtension("WEBKIT_EXT_texture_filter_anisotropic")
+                || gl.getExtension("MOZ_EXT_texture_filter_anisotropic");
         if (b) {
-            var c = a.getParameter(b.MAX_TEXTURE_MAX_ANISOTROPY_EXT);
+            var c = gl.getParameter(b.MAX_TEXTURE_MAX_ANISOTROPY_EXT);
             return 0 === c && (c = 2), c
         }
         return "n/a"
     }
 
-    function i(a) {
+    function getMajorPerformanceCaveat(a) {
         try {
             var b = $("<canvas />", {width: "1", height: "1"}).appendTo("body"),
                 c = b[0].getContext(a, {failIfMajorPerformanceCaveat: true});
             b.remove();
             if (c) {
                 if (void 0 === c.getContextAttributes().failIfMajorPerformanceCaveat) {
-                    p(c);
+                    destroy_webgl(c);
                     return "Not implemented";
                 } else {
-                    p(c);
+                    destroy_webgl(c);
                     return "False";
                 }
             } else {
@@ -410,16 +450,22 @@ $(function () {
         }
     }
 
-    function j(a) {
-        var b = 1, c = a.getExtension("WEBGL_draw_buffers");
-        return null != c && (b = a.getParameter(c.MAX_DRAW_BUFFERS_WEBGL)), b
+    function getMaxDrawBuffers(gl) {
+        var b = 0, 
+            draw_buffers_ext = gl.getExtension("WEBGL_draw_buffers");
+        if (draw_buffers_ext !== null) {
+            b = gl.getParameter(draw_buffers_ext.MAX_DRAW_BUFFERS_WEBGL);
+        }
+        return b;
     }
 
-    function k(a) {
+    function getFloatIntPrecision(gl) {
         try {
-            var b = a.getShaderPrecisionFormat(a.FRAGMENT_SHADER, a.HIGH_FLOAT),
-                c = 0 !== b.precision ? "highp/" : "mediump/";
-            return b = a.getShaderPrecisionFormat(a.FRAGMENT_SHADER, a.HIGH_INT), c += 0 !== b.rangeMax ? "highp" : "lowp"
+            var frag_prec_h_float = gl.getShaderPrecisionFormat(gl.FRAGMENT_SHADER, gl.HIGH_FLOAT),
+                frag_prec_h_int = gl.getShaderPrecisionFormat(gl.FRAGMENT_SHADER, gl.HIGH_INT), 
+                html = 0 !== frag_prec_h_float.precision ? "highp/" : "mediump/";
+            html += 0 !== frag_prec_h_int.rangeMax ? "highp" : "lowp";
+            return html;
         } catch (exc) {
             if (DEBUG) {
                 console.warn("getFloatIntPrecision", ctx);
@@ -428,38 +474,65 @@ $(function () {
         }
     }
 
-    function l(a) {
-        var b = [];
+    function getWebGLExtensionsWithLinks(gl) {
+        var extensions = [];
         try {
-            b = a.getSupportedExtensions()
+            extensions = gl.getSupportedExtensions();
         } catch (exc) {
             if (DEBUG) {
                 console.warn("getWebGLExtensionsWithLinks", exc);
             }
         }
-        var c = "<tr><td>Supported WebGL Extensions</td>", 
-            d = [];
-        if (void 0 !== b && b.length) {
-            for (var e = 0, f = b.length; e < f; e++) "WEBGL_debug_renderer_info" != b[e] && "WEBGL_debug_shaders" != b[e] ? (e > 0 && (c += '<tr><td class="nt"></td>'), c += '<td class="ext-link"><span class="href">' + b[e] + "</span></td></tr>") : d.push(b[e]);
-            if (c += "<tr><td>Supported Privileged Extensions</td>", d.length > 0) for (var e in d) e > 0 && (c += '<tr><td class="nt"></td>'), c += '<td class="ext-link"><span class="href">' + d[e] + "</span></td></tr>"; else c += "<td>n/a</td></tr>"
-        } else c += "<td>No extensions were found</td></tr>";
-        return c
+        var html = "<tr><td>Supported WebGL Extensions</td>", 
+            supported_extensions = [];
+        if (extensions !== undefined && extensions.length){
+            for (var i = 0, len = extensions.length; i < len; i++) {
+                if ("WEBGL_debug_renderer_info" != extensions[i] && "WEBGL_debug_shaders" != extensions[i]){
+                    if (i > 0) {
+                        html += '<tr><td class="nt"></td>';
+                    }
+                    html += '<td class="ext-link"><span class="href">' + extensions[i] + "</span></td></tr>";
+                } else {
+                    supported_extensions.push(extensions[i]);
+                }
+            }
+            html += "<tr><td>Supported Privileged Extensions</td>";
+            if (supported_extensions.length > 0) {
+                for (var index in supported_extensions) {
+                    if (index > 0){
+                        html += '<tr><td class="nt"></td>';
+                    }
+                    html += '<td class="ext-link"><span class="href">' + supported_extensions[index] + "</span></td></tr>";
+                }
+            } else {
+                html += "<td>n/a</td></tr>";
+            }
+        } else {
+            html += "<td>No extensions were found</td></tr>";
+        }
+        return html;
     }
 
-    function m(a, b) {
-        return b ? "" + Math.pow(2, a) : "2<sup>" + a + "</sup>"
+    function render_range_value(value, as_number) {
+        return as_number ? "" + Math.pow(2, value) : "2<sup>" + value + "</sup>";
     }
 
-    function n(a, b) {
-        var c = b ? " bit mantissa" : "";
-        return "[-" + m(a.rangeMin, b) + ", " + m(a.rangeMax, b) + "] (" + a.precision + c + ")"
+    function render_range(value, as_number) {
+        var c = as_number ? " bit mantissa" : "";
+        return "[-" + render_range_value(value.rangeMin, as_number) + ", " + render_range_value(value.rangeMax, as_number) + "] (" + value.precision + c + ")"
     }
 
-    function o(a, b) {
+    function describePrecision(gl, shaderType) {
+        // https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/getShaderPrecisionFormat
         try {
-            var c = a.getShaderPrecisionFormat(b, a.HIGH_FLOAT), d = a.getShaderPrecisionFormat(b, a.MEDIUM_FLOAT),
-                e = a.getShaderPrecisionFormat(b, a.LOW_FLOAT), f = c;
-            return 0 === c.precision && (f = d), '<span title="High: ' + n(c, !0) + "\n\nMedium: " + n(d, !0) + "\n\nLow: " + n(e, !0) + '">' + n(f, false) + "</span>"
+            var high = gl.getShaderPrecisionFormat(shaderType, gl.HIGH_FLOAT),
+                med = gl.getShaderPrecisionFormat(shaderType, gl.MEDIUM_FLOAT),
+                low = gl.getShaderPrecisionFormat(shaderType, gl.LOW_FLOAT), 
+                label = high;
+            if (high.precision === 0) {
+                label = med;
+            }
+            return '<span title="High: ' + render_range(high, true) + "\n\nMedium: " + render_range(med, true) + "\n\nLow: " + render_range(low, true) + '">' + render_range(label, false) + "</span>";
         } catch (exc) {
             if (DEBUG) {
                 console.warn("describePrecision", exc);
@@ -468,10 +541,14 @@ $(function () {
         }
     }
 
-    function p(a) {
+    function destroy_webgl(gl) {
         try {
-            var b = a.getExtension("WEBGL_lose_context") || a.getExtension("WEBKIT_WEBGL_lose_context") || a.getExtension("MOZ_WEBGL_lose_context");
-            null != b && b.loseContext()
+            var lc_ext = gl.getExtension("WEBGL_lose_context") 
+                        || gl.getExtension("WEBKIT_WEBGL_lose_context")
+                        || gl.getExtension("MOZ_WEBGL_lose_context");
+            if (lc_ext !== null) {
+                lc_ext.loseContext();
+            }
         } catch (exc) {
             if (DEBUG) {
                 console.warn("lose_context", exc);
@@ -479,18 +556,18 @@ $(function () {
         }
     }
 
-    var DEBUG = false, 
-        r = '<span class="good">&#10004;</span>',
-        s = '<span class="bad">&#215;</span>', 
-        t = [
-            s + "False",
-            r + "True",
-            s + "False (supported, but disabled in browser settings, or blocked by extensions)",
-            s + "False (supported, but blocked by browser extensions)"
+    var DEBUG = true, 
+        icon_supported = '<span class="good">&#10004;</span>',
+        icon_unsupported = '<span class="bad">&#215;</span>', 
+        html_value_map = [
+            icon_unsupported + "False",
+            icon_supported + "True",
+            icon_unsupported + "False (supported, but disabled in browser settings, or blocked by extensions)",
+            icon_unsupported + "False (supported, but blocked by browser extensions)"
         ],
         webgl2_support_functions = "";
 
-    a();
+    render_webgl_table();
     (function () {
         setTimeout(function () {
             var canvas, ctx, width = 256, height = 128;  // var a;
@@ -515,6 +592,9 @@ $(function () {
             }
 
             var c = document.getElementById("webgl-table").innerHTML;
+            if (DEBUG) {
+                console.log("webgl_table:", c);
+            }
             $("#hash").text(c);
             c = md5(c);
             $("#webgl-fp-context").addClass("mono upper").text(c);
