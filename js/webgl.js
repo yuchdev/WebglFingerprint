@@ -49,14 +49,14 @@ $(function () {
         }
 
         if (x) {
-            var C = x.gl;
+            var ctx = x.gl;
             if ("2" == x.name[0].slice(-1)) {
                 A = 2;
                 $("#webgl-table tbody.w2").removeClass("n");
                 $("#webgl-table tbody.w1").addClass("n");
             }
             else {
-                if ("fake-webgl" == x.name[0] || "function" != typeof C.getParameter && "object" != typeof C.getParameter) {
+                if ("fake-webgl" == x.name[0] || "function" != typeof ctx.getParameter && "object" != typeof ctx.getParameter) {
                     var u = 3;
                     return false
                 }
@@ -158,7 +158,7 @@ $(function () {
 
                     var F = D[z],
                         G = $("#n" + z);
-                    if (C[F]){
+                    if (ctx[F]){
                         E++;
                         G.html(icon_supported + "True");
                     } else {
@@ -190,62 +190,75 @@ $(function () {
                 console.log("t3-t2", I - B)
             }
 
-            var J = ["VERSION"
-                , "SHADING_LANGUAGE_VERSION"
-                , "VENDOR", "RENDERER"
-                , "MAX_VERTEX_ATTRIBS"
-                , "MAX_VERTEX_UNIFORM_VECTORS"
-                , "MAX_VERTEX_TEXTURE_IMAGE_UNITS"
-                , "MAX_VARYING_VECTORS"
-                , "ALIASED_LINE_WIDTH_RANGE"
-                , "ALIASED_POINT_SIZE_RANGE"
-                , "MAX_FRAGMENT_UNIFORM_VECTORS"
-                , "MAX_TEXTURE_IMAGE_UNITS"
-                , ["RED_BITS", "GREEN_BITS", "BLUE_BITS", "ALPHA_BITS"]
-                , ["DEPTH_BITS", "STENCIL_BITS"]
-                , "MAX_RENDERBUFFER_SIZE"
-                , "MAX_VIEWPORT_DIMS"
-                , "MAX_TEXTURE_SIZE"
-                , "MAX_CUBE_MAP_TEXTURE_SIZE"
-                , "MAX_COMBINED_TEXTURE_IMAGE_UNITS"];
+            var PROPERTIES = [
+                "VERSION",
+                "SHADING_LANGUAGE_VERSION", 
+                "VENDOR", 
+                "RENDERER", 
+                "MAX_VERTEX_ATTRIBS", 
+                "MAX_VERTEX_UNIFORM_VECTORS", 
+                "MAX_VERTEX_TEXTURE_IMAGE_UNITS", 
+                "MAX_VARYING_VECTORS", 
+                "ALIASED_LINE_WIDTH_RANGE", 
+                "ALIASED_POINT_SIZE_RANGE", 
+                "MAX_FRAGMENT_UNIFORM_VECTORS", 
+                "MAX_TEXTURE_IMAGE_UNITS", 
+                ["RED_BITS", "GREEN_BITS", "BLUE_BITS", "ALPHA_BITS"], 
+                ["DEPTH_BITS", "STENCIL_BITS"], 
+                "MAX_RENDERBUFFER_SIZE", 
+                "MAX_VIEWPORT_DIMS", 
+                "MAX_TEXTURE_SIZE", 
+                "MAX_CUBE_MAP_TEXTURE_SIZE", 
+                "MAX_COMBINED_TEXTURE_IMAGE_UNITS"
+            ];
 
             if (2 == A) {
-                var K = ["MAX_VERTEX_UNIFORM_COMPONENTS"
-                    , "MAX_VERTEX_UNIFORM_BLOCKS"
-                    , "MAX_VERTEX_OUTPUT_COMPONENTS"
-                    , "MAX_VARYING_COMPONENTS"
-                    , "MAX_TRANSFORM_FEEDBACK_INTERLEAVED_COMPONENTS"
-                    , "MAX_TRANSFORM_FEEDBACK_SEPARATE_ATTRIBS"
-                    , "MAX_TRANSFORM_FEEDBACK_SEPARATE_COMPONENTS"
-                    , "MAX_FRAGMENT_UNIFORM_COMPONENTS"
-                    , "MAX_FRAGMENT_UNIFORM_BLOCKS"
-                    , "MAX_FRAGMENT_INPUT_COMPONENTS"
-                    , "MIN_PROGRAM_TEXEL_OFFSET"
-                    , "MAX_PROGRAM_TEXEL_OFFSET"
-                    , "MAX_DRAW_BUFFERS"
-                    , "MAX_COLOR_ATTACHMENTS"
-                    , "MAX_SAMPLES"
-                    , "MAX_3D_TEXTURE_SIZE"
-                    , "MAX_ARRAY_TEXTURE_LAYERS"
-                    , "MAX_TEXTURE_LOD_BIAS"
-                    , "MAX_UNIFORM_BUFFER_BINDINGS"
-                    , "MAX_UNIFORM_BLOCK_SIZE"
-                    , "UNIFORM_BUFFER_OFFSET_ALIGNMENT"
-                    , "MAX_COMBINED_UNIFORM_BLOCKS"
-                    , "MAX_COMBINED_VERTEX_UNIFORM_COMPONENTS"
-                    , "MAX_COMBINED_FRAGMENT_UNIFORM_COMPONENTS"];
-                J = J.concat(K)
+                PROPERTIES = PROPERTIES.concat([
+                    "MAX_VERTEX_UNIFORM_COMPONENTS", 
+                    "MAX_VERTEX_UNIFORM_BLOCKS", 
+                    "MAX_VERTEX_OUTPUT_COMPONENTS", 
+                    "MAX_VARYING_COMPONENTS", 
+                    "MAX_TRANSFORM_FEEDBACK_INTERLEAVED_COMPONENTS", 
+                    "MAX_TRANSFORM_FEEDBACK_SEPARATE_ATTRIBS", 
+                    "MAX_TRANSFORM_FEEDBACK_SEPARATE_COMPONENTS", 
+                    "MAX_FRAGMENT_UNIFORM_COMPONENTS", 
+                    "MAX_FRAGMENT_UNIFORM_BLOCKS", 
+                    "MAX_FRAGMENT_INPUT_COMPONENTS", 
+                    "MIN_PROGRAM_TEXEL_OFFSET", 
+                    "MAX_PROGRAM_TEXEL_OFFSET", 
+                    "MAX_DRAW_BUFFERS", 
+                    "MAX_COLOR_ATTACHMENTS", 
+                    "MAX_SAMPLES", 
+                    "MAX_3D_TEXTURE_SIZE", 
+                    "MAX_ARRAY_TEXTURE_LAYERS", 
+                    "MAX_TEXTURE_LOD_BIAS", 
+                    "MAX_UNIFORM_BUFFER_BINDINGS", 
+                    "MAX_UNIFORM_BLOCK_SIZE", 
+                    "UNIFORM_BUFFER_OFFSET_ALIGNMENT", 
+                    "MAX_COMBINED_UNIFORM_BLOCKS", 
+                    "MAX_COMBINED_VERTEX_UNIFORM_COMPONENTS", 
+                    "MAX_COMBINED_FRAGMENT_UNIFORM_COMPONENTS"
+                ]);
             }
 
-            for (var z in J) {
-                var L = "";
-                if (J[z] instanceof Array) {
-                    for (var M in J[z]) L.length && (L += ", "), L += C.getParameter(C[J[z][M]]);
-                    L = "[" + L + "]"
-                }
-                else {
-                    L = C.getParameter(C[J[z]]), null === L ? L = "n/a" : "object" == typeof L && null != L && (L = d(L));
-                    $("#f" + z).text(L)
+            for (var i in PROPERTIES) {
+                var prop_str = "";
+                if (PROPERTIES[i] instanceof Array) {
+                    for (var j in PROPERTIES[i]) {
+                        if (prop_str.length){
+                            prop_str += ", ";
+                        }
+                        prop_str += ctx.getParameter(ctx[PROPERTIES[i][j]]);
+                    }
+                    prop_str = "[" + prop_str + "]";
+                } else {
+                    prop_str = ctx.getParameter(ctx[PROPERTIES[i]]);
+                    if (prop_str === null){
+                        prop_str = "n/a";
+                    } else if (typeof prop_str === "object" && prop_str != null) {
+                        prop_str = range_to_str(prop_str);
+                    }
+                    $("#f" + i).text(prop_str);
                 }
             }
 
@@ -270,7 +283,7 @@ $(function () {
             $("#f_name").html(N);
             if (DEBUG) {
                 var O = performance.now();
-                console.log("t4-t3", O - I)
+                console.log("t4-t3", O - I);
             }
 
             for (var i in supported_webgl_implementations) {
@@ -281,40 +294,57 @@ $(function () {
                 });
             }
 
-            $("#f_alias").text(getAntialiasing(C));
-            var P = f(C);
-            $("#u_vendor").html(P.vendor)
-                , $("#u_renderer").html(P.renderer)
-                , $("#f_angle").text(getANGLE(C))
-                , $("#f_anisotropy").text(getAnisotropy(C))
-                , $("#f_caveat").text(getMajorPerformanceCaveat(x.name[0]))
-                , 1 == A && $("#f_max_draw_buffers").text(getMaxDrawBuffers(C))
-                , $("#f_float_int").text(getFloatIntPrecision(C))
-                , $("#f_ext").html(getWebGLExtensionsWithLinks(C))
-                , $("#f_vertext").html(describePrecision(C, C.VERTEX_SHADER))
-                , $("#f_fragment").html(describePrecision(C, C.FRAGMENT_SHADER))
-                , $(".ext-link").each(function () {
+            $("#f_alias").text(getAntialiasing(ctx));
+            var debug_renderer_info = getDebugRendererInfo(ctx);
+            $("#u_vendor").html(debug_renderer_info.vendor);
+            $("#u_renderer").html(debug_renderer_info.renderer);
+            $("#f_angle").text(getANGLE(ctx));
+            $("#f_anisotropy").text(getAnisotropy(ctx));
+            $("#f_caveat").text(getMajorPerformanceCaveat(x.name[0]));
+
+            if (1 == A) {
+                $("#f_max_draw_buffers").text(getMaxDrawBuffers(ctx));
+            }
+            
+            $("#f_float_int").text(getFloatIntPrecision(ctx));
+            $("#f_ext").html(getWebGLExtensionsWithLinks(ctx));
+            $("#f_vertext").html(describePrecision(ctx, ctx.VERTEX_SHADER));
+            $("#f_fragment").html(describePrecision(ctx, ctx.FRAGMENT_SHADER));
+            $(".ext-link").each(function () {
                 $(this).on("mouseover", function () {
                     $(this).off();
-                    var a = ext_link = $(this).first().text();
-                    "WEBKIT_lose_context" === ext_link
-                        ? ext_link = "WEBGL_lose_context"
-                        : "WEBKIT_WEBGL_compressed_textures" === ext_link && (ext_link = "")
-                        , ext_link = ext_link.replace(/^WEBKIT_|MOZ_|_EXT_/, "")
-                        , $(this).html('<a href="https://www.khronos.org/registry/webgl/extensions/'
+                    var orig_value = ext_link = $(this).first().text();
+                    if ("WEBKIT_lose_context" === ext_link) {
+                        ext_link = "WEBGL_lose_context";
+                    } else if ("WEBKIT_WEBGL_compressed_textures" === ext_link) {
+                        ext_link = "";
+                    }
+                    ext_link = ext_link.replace(/^WEBKIT_|MOZ_|_EXT_/, "");
+                    $(this).html(
+                        '<a href="https://www.khronos.org/registry/webgl/extensions/'
                         + ext_link
                         + '" title="'
                         + ("" != ext_link
                             ? ext_link += " — "
-                            : "") + 'WebGL Extension Specification" rel="noopener nofollow" target="_blank">'
-                        + a
-                        + "</a>")
+                            : "")
+                        + 'WebGL Extension Specification" rel="noopener nofollow" target="_blank">'
+                        + orig_value
+                        + "</a>"
+                    );
                 })
-                }), window.location.hash && !webgl_implementation && clck(), 1 == A
-                ? $(".w1").addClass("w1only")
-                : 2 == A && $(".w2").addClass("w2only"), destroy_webgl(C)
-        }
-        else {
+            });
+            if (window.location.hash && !webgl_implementation) {
+                //
+                // !!! Потеряли где-то эту функцию.
+                clck();
+            }
+            if (1 == A) {
+                $(".w1").addClass("w1only");
+            } else if (2 == A) {
+                $(".w2").addClass("w2only");
+            }
+            destroy_webgl(ctx);
+        } else {
             $("#webgl-table").removeClass("script").addClass("opac");
             $("#webgl-table em.ns").removeClass("ns");
         }
@@ -382,27 +412,36 @@ $(function () {
         return !!ctx && { name: supported_implementations, gl: ctx}
     }
 
-    function d(a) {
-        return null == a ? "null" : "[" + a[0] + ", " + a[1] + "]"
+    function range_to_str(arr) {
+        if (arr == null) {
+            return "null";
+        } else {
+            return "[" + arr[0] + ", " + arr[1] + "]";
+        }
     }
 
-    function getAntialiasing(a) {
-        var b = false;
+    function getAntialiasing(gl) {
+        var is_supported = false;
         try {
-            b = a.getContextAttributes().antialias
+            is_supported = gl.getContextAttributes().antialias
         } catch (exc) {
             if (DEBUG) {
                 console.warn("getAntialiasing", exc);
             }
         }
-        return b ? "True" : "False"
+        return is_supported ? "True" : "False"
     }
 
-    function f(a) {
-        var b = '<span class="bad">!</span> ', 
-            c = {renderer: "n/a", vendor: "n/a"},
-            d = a.getExtension("WEBGL_debug_renderer_info");
-        return null != d && (c.renderer = b + a.getParameter(d.UNMASKED_RENDERER_WEBGL), c.vendor = b + a.getParameter(d.UNMASKED_VENDOR_WEBGL)), c
+    function getDebugRendererInfo(gl) {
+        var icon_html = '<span class="bad">!</span> ', 
+            result = {renderer: "n/a", vendor: "n/a"},
+            debug_renderer_info = gl.getExtension("WEBGL_debug_renderer_info");
+
+        if (debug_renderer_info != null) {
+            result.renderer = icon_html + gl.getParameter(debug_renderer_info.UNMASKED_RENDERER_WEBGL);
+            result.vendor = icon_html + gl.getParameter(debug_renderer_info.UNMASKED_VENDOR_WEBGL);
+        }
+        return result;
     }
 
     function getANGLE(a) {
@@ -411,8 +450,20 @@ $(function () {
             return 0 !== a && 0 == (a & a - 1)
         }
 
-        var c = d(a.getParameter(a.ALIASED_LINE_WIDTH_RANGE));
-        return "Win32" !== navigator.platform && "Win64" !== navigator.platform || "Internet Explorer" === a.getParameter(a.RENDERER) || "Microsoft Edge" === a.getParameter(a.RENDERER) || c !== d([1, 1]) ? "False" : b(a.getParameter(a.MAX_VERTEX_UNIFORM_VECTORS)) && b(a.getParameter(a.MAX_FRAGMENT_UNIFORM_VECTORS)) ? "True, Direct3D 11" : "True, Direct3D 9"
+        var c = range_to_str(a.getParameter(a.ALIASED_LINE_WIDTH_RANGE));
+        if ("Win32" !== navigator.platform 
+            && "Win64" !== navigator.platform 
+            || "Internet Explorer" === a.getParameter(a.RENDERER) 
+            || "Microsoft Edge" === a.getParameter(a.RENDERER) 
+            || c !== range_to_str([1, 1])) {
+                return "False";
+        } else if (b(a.getParameter(a.MAX_VERTEX_UNIFORM_VECTORS)) 
+                    && b(a.getParameter(a.MAX_FRAGMENT_UNIFORM_VECTORS))){
+            return "True, Direct3D 11";
+        } else {
+            return "True, Direct3D 9";
+        }
+        //return "Win32" !== navigator.platform && "Win64" !== navigator.platform || "Internet Explorer" === a.getParameter(a.RENDERER) || "Microsoft Edge" === a.getParameter(a.RENDERER) || c !== d([1, 1]) ? "False" : b(a.getParameter(a.MAX_VERTEX_UNIFORM_VECTORS)) && b(a.getParameter(a.MAX_FRAGMENT_UNIFORM_VECTORS)) ? "True, Direct3D 11" : "True, Direct3D 9"
     }
 
     function getAnisotropy(gl) {
@@ -421,7 +472,10 @@ $(function () {
                 || gl.getExtension("MOZ_EXT_texture_filter_anisotropic");
         if (b) {
             var c = gl.getParameter(b.MAX_TEXTURE_MAX_ANISOTROPY_EXT);
-            return 0 === c && (c = 2), c
+            if (c === 0){
+                c = 2;
+            }
+            return c;
         }
         return "n/a"
     }
