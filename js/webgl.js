@@ -74,7 +74,7 @@ $(function () {
 
             if (w && "" == webgl2_support_functions && 2 == A) {
 
-                for (var D = ["copyBufferSubData"
+                for (var webgl_functions = ["copyBufferSubData"
                     , "getBufferSubData"
                     , "blitFramebuffer"
                     , "framebufferTextureLayer"
@@ -161,9 +161,9 @@ $(function () {
                     , "createVertexArray"
                     , "deleteVertexArray"
                     , "isVertexArray"
-                    , "bindVertexArray"], E = 0, z = 0; z < D.length; z++) {
+                    , "bindVertexArray"], E = 0, z = 0; z < webgl_functions.length; z++) {
 
-                    var F = D[z],
+                    var F = webgl_functions[z],
                         G = $("#n" + z);
                     if (webglRenderContext[F]){
                         E++;
@@ -178,7 +178,7 @@ $(function () {
                     webgl2_support_functions = " ("
                         + E
                         + ' of '
-                        + D.length
+                        + webgl_functions.length
                         + ' new functions implemented) <input type="button" value="more" />';
                 }
             }
