@@ -3,6 +3,11 @@ $(function () {
 
     "use strict";
 
+    const GL_UNSUPPORTED = 0;
+    const GL_SUPPORTED = 1;
+    const GL_DISABLED = 2;
+    const GL_BLOCKED = 3;
+
     /// @function: renderWebglTable
     /// @param: webgl_implementation
     /// @param: supported_webgl_implementations
@@ -17,22 +22,23 @@ $(function () {
             webgl_implementation = false;
         }
 
-        var u = 0, v = 0;
+        var webgl_1_status = GL_UNSUPPORTED;
+        var webgl_2_status = GL_UNSUPPORTED;
 
         if (window.WebGLRenderingContext){
-            u = 1;
+            webgl_1_status = GL_SUPPORTED;
         }
         if (window.WebGL2RenderingContext){
-            v = 1;
+            webgl_2_status = GL_SUPPORTED;
         }
-        var w = !!window.WebGL2RenderingContext,
-            x = webglDetect(webgl_implementation);
+        var is_webgl2_supported = !!window.WebGL2RenderingContext;
+        var webglImpl = webglDetect();
 
         if (!webgl_implementation) {
-            supported_webgl_implementations = x.name;
+            supported_webgl_implementations = webglImpl.name;
         }
 
-        if (1 != u || x || (u = 2), 1 == v) {
+        if (GL_SUPPORTED != webgl_1_status || webglImpl || (webgl_1_status = GL_DISABLED), GL_SUPPORTED == webgl_2_status) {
             var y = false;
             for (var i in supported_webgl_implementations) {
                 // check if webgl2/experimental-webgl is supported
@@ -40,7 +46,7 @@ $(function () {
                     y = true;
                 }
                 if (!y){
-                    v = 2;
+                    webgl_2_status = GL_DISABLED;
                 }
             }
         }
@@ -52,19 +58,19 @@ $(function () {
             console.log("t2-t1 = ", t2 - t1);
         }
 
-        if (x) {
-            var webglRenderContext = x.gl;
-            if ("2" == x.name[0].slice(-1)) {
+        if (webglImpl) {
+            var webglRenderContext = webglImpl.gl;
+            if ("2" == webglImpl.name[0].slice(-1)) {
                 A = 2;
                 $("#webgl-table tbody.w2").removeClass("n");
                 $("#webgl-table tbody.w1").addClass("n");
             }
             else {
-                if ("fake-webgl" == x.name[0]
+                if ("fake-webgl" == webglImpl.name[0]
                     || "function" != typeof webglRenderContext.getParameter
-                    && "object" != typeof webglRenderContext.getParameter) {
+                    && "object" != typeof webglReunderContext.getParameter) {
 
-                    var u = 3;
+                    var webgl_1_status = GL_BLOCKED;
                     return false;
                 }
                 A = 1;
@@ -72,7 +78,7 @@ $(function () {
                 $("#webgl-table tbody.w2").addClass("n");
             }
 
-            if (w && "" == webgl2_support_functions && 2 == A) {
+            if (is_webgl2_supported && "" == webgl2_support_functions && 2 == A) {
 
                 for (var webgl_functions = ["copyBufferSubData"
                     , "getBufferSubData"
@@ -276,7 +282,7 @@ $(function () {
                 if ("" != N){
                     N += ", ";
                 }
-                if (supported_webgl_implementations[i] != x.name[0]) {
+                if (supported_webgl_implementations[i] != webglImpl.name[0]) {
                     N += '<span class="href" id="switch-'
                         + supported_webgl_implementations[i]
                         + '" title="switch to &quot;'
@@ -288,7 +294,7 @@ $(function () {
                     N += "<strong>";
                 }
                 N += supported_webgl_implementations[i];
-                if (supported_webgl_implementations[i] != x.name[0]) {
+                if (supported_webgl_implementations[i] != webglImpl.name[0]) {
                     N += "</span>";
                 }
                 else if (supported_webgl_implementations.length > 1) {
@@ -318,7 +324,7 @@ $(function () {
                 , $("#u_renderer").html(debug_renderer_info.renderer)
                 , $("#f_angle").text(getANGLE(webglRenderContext))
                 , $("#f_anisotropy").text(getAnisotropy(webglRenderContext))
-                , $("#f_caveat").text(getMajorPerformanceCaveat(x.name[0]))
+                , $("#f_caveat").text(getMajorPerformanceCaveat(webglImpl.name[0]))
                 , 1 == A && $("#f_max_draw_buffers").text(getMaxDrawBuffers(webglRenderContext))
                 , $("#f_float_int").text(getFloatIntPrecision(webglRenderContext))
                 , $("#f_ext").html(getWebGLExtensionsWithLinks(webglRenderContext))
@@ -358,8 +364,8 @@ $(function () {
             console.log("t5-t4 = ", t5 - t4);
         }
 
-        $("#webgl1-status").html(html_value_map[u]);
-        $("#webgl2-status").html(html_value_map[v] + (1 == v ? webgl2_support_functions : ""));
+        $("#webgl1-status").html(html_value_map[webgl_1_status]);
+        $("#webgl2-status").html(html_value_map[webgl_2_status] + (1 == webgl_2_status ? webgl2_support_functions : ""));
         if (A && "" != webgl2_support_functions) {
             var R = $("#webgl2-status input"),
                 S = $("#webgl2-tbody");
@@ -382,24 +388,19 @@ $(function () {
     }
 
     /// @function: webglDetect
-    /// @param: webgl_implementation
-    function webglDetect(webgl_implementation) {
+    /// @return: Object { gl: WebGL context, name: array of supported WebGL implementation names}
+    function webglDetect() {
 
-        if (webgl_implementation) {
-            var gl_implementations = [webgl_implementation];
-        }
-        else {
-            var gl_implementations = [
-                "webgl2", "experimental-webgl2", "webgl", "experimental-webgl",
-                "moz-webgl", "fake-webgl"
-            ];
-        }
+        var gl_implementations = [
+            "webgl2", "experimental-webgl2", "webgl", "experimental-webgl",
+            "moz-webgl", "fake-webgl"
+        ];
 
-        var supported_implementations = [],
-            ctx = false, 
-            impl_ctx = false;
+        let supported_implementations = [];
+        let ctx = false;
+        let impl_ctx = false;
 
-        for (var index in gl_implementations) {
+        for (let index in gl_implementations) {
             impl_ctx = false;
             try {
                 impl_ctx = document.createElement("canvas")
@@ -407,12 +408,14 @@ $(function () {
                 if (impl_ctx){
                     if (ctx) {
                         destroyWebgl(impl_ctx);
-                    } else {
+                    }
+                    else {
                         ctx = impl_ctx;
                     }
                     supported_implementations.push(gl_implementations[index]);
                 }
-            } catch (exc) {
+            }
+            catch (exc) {
                 if (DEBUG) {
                     console.warn("webglDetect", exc);
                 }
@@ -644,7 +647,7 @@ $(function () {
     var DEBUG = true,
         VERBOSE_DEBUG = false,
         icon_supported = '<span class="good">&#10004;</span>',
-        icon_unsupported = '<span class="bad">&#215;</span>', 
+        icon_unsupported = '<span class="bad">&#215;</span>',
         html_value_map = [
             icon_unsupported + "False",
             icon_supported + "True",
