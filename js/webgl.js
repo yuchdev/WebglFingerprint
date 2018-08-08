@@ -32,6 +32,9 @@ $(function () {
         if (webgl_implementation === undefined) {
             webgl_implementation = false;
         }
+        else {
+            console.log()
+        }
 
         let webgl_1_status = GL_UNSUPPORTED;
         let webgl_2_status = GL_UNSUPPORTED;
@@ -55,8 +58,8 @@ $(function () {
 
         if (GL_SUPPORTED === webgl_2_status) {
 
-            const webgl_2_implementations = supported_webgl_implementations.filter(function (webgl_implementation){
-                    return webgl_implementation.slice(-1) === "2";
+            const webgl_2_implementations = supported_webgl_implementations.filter(function (impl){
+                    return impl.slice(-1) === "2";
             });
 
             if (webgl_2_implementations.length === 0){
@@ -81,7 +84,7 @@ $(function () {
             else {
                 if ("fake-webgl" === webgl_impl.name[0]
                     || "function" !== typeof render_context.getParameter
-                    && "object" !== typeof webglReunderContext.getParameter) {
+                    && "object" !== typeof render_context.getParameter) {
 
                     webgl_1_status = GL_BLOCKED;
                     return false;
@@ -91,9 +94,9 @@ $(function () {
                 $("#webgl-table tbody.w2").addClass("n");
             }
 
-            if (is_webgl2_supported && "" == webgl2_support_functions && 2 == maximum_webgl_version) {
+            if (is_webgl2_supported && "" === webgl2_support_functions && 2 === maximum_webgl_version) {
 
-                for (var webgl_functions = ["copyBufferSubData"
+                const WEBGL_FUNCTIONS = ["copyBufferSubData"
                     , "getBufferSubData"
                     , "blitFramebuffer"
                     , "framebufferTextureLayer"
@@ -180,34 +183,38 @@ $(function () {
                     , "createVertexArray"
                     , "deleteVertexArray"
                     , "isVertexArray"
-                    , "bindVertexArray"], E = 0, z = 0; z < webgl_functions.length; z++) {
+                    , "bindVertexArray"];
 
-                    var F = webgl_functions[z],
-                        G = $("#n" + z);
-                    if (render_context[F]){
-                        E++;
-                        G.html(ICON_SUPPORTED + "True");
+                let supported_gl_functions_count = 0;
+
+                for (let func_idx = 0; func_idx < WEBGL_FUNCTIONS.length; func_idx++) {
+
+                    let gl_function_name = WEBGL_FUNCTIONS[func_idx];
+                    let html_table_row = $("#n" + func_idx);
+                    if (render_context[gl_function_name]){
+                        supported_gl_functions_count++;
+                        html_table_row.html(ICON_SUPPORTED + "True");
                     }
                     else {
-                        G.html(ICON_UNSUPPORTED + "False")
+                        html_table_row.html(ICON_UNSUPPORTED + "False")
                     }
                 }
 
-                if (E > 0) {
+                if (supported_gl_functions_count > 0) {
                     webgl2_support_functions = " ("
-                        + E
+                        + supported_gl_functions_count
                         + ' of '
-                        + webgl_functions.length
-                        + ' new functions implemented) <input type="button" value="more" />';
+                        + WEBGL_FUNCTIONS.length
+                        + ' new functions implemented)<input type="button" value="more" />';
                 }
             }
 
             if (webgl_implementation == false) {
-                var H;
+                let extensions_list_str = "";
                 $("#webgl-table td:nth-child(2)").each(function (a) {
-                    H = $(this).text();
-                    if (H.length && "n/a" != H){
-                        $(this).prev().attr("title", H);
+                    extensions_list_str = $(this).text();
+                    if (extensions_list_str.length && "n/a" !== extensions_list_str){
+                        $(this).prev().attr("title", extensions_list_str);
                     }
                 })
             }
@@ -217,7 +224,7 @@ $(function () {
                 console.log("t3-t2 = ", t3 - t2, "ms");
             }
 
-            var webgl_params = ["VERSION"
+            let webgl_params = ["VERSION"
                 , "SHADING_LANGUAGE_VERSION"
                 , "VENDOR", "RENDERER"
                 , "MAX_VERTEX_ATTRIBS"
@@ -236,8 +243,8 @@ $(function () {
                 , "MAX_CUBE_MAP_TEXTURE_SIZE"
                 , "MAX_COMBINED_TEXTURE_IMAGE_UNITS"];
 
-            if (2 == maximum_webgl_version) {
-                var webgl_v2_params = ["MAX_VERTEX_UNIFORM_COMPONENTS"
+            if (2 === maximum_webgl_version) {
+                const webgl_v2_params = ["MAX_VERTEX_UNIFORM_COMPONENTS"
                     , "MAX_VERTEX_UNIFORM_BLOCKS"
                     , "MAX_VERTEX_OUTPUT_COMPONENTS"
                     , "MAX_VARYING_COMPONENTS"
@@ -264,66 +271,77 @@ $(function () {
                 webgl_params = webgl_params.concat(webgl_v2_params)
             }
 
-            for (var webg_param_index in webgl_params) {
+            for (let webgl_param_index in webgl_params) {
 
-                var webgl_param_value = "";
-                if (webgl_params[webg_param_index] instanceof Array) {
-                    for (var M in webgl_params[webg_param_index]){
-                        webgl_param_value.length && (webgl_param_value += ", "),
-                            webgl_param_value += render_context.getParameter(render_context[webgl_params[webg_param_index][M]]);
+                let webgl_param_value = "";
+                if (webgl_params[webgl_param_index] instanceof Array) {
+
+                    for (let webgl_param_subindex in webgl_params[webgl_param_index]){
+
+                        if(webgl_param_value.length > 0){
+                            webgl_param_value += ", ";
+                        }
+
+                        webgl_param_value += render_context.getParameter(
+                                render_context[webgl_params[webgl_param_index][webgl_param_subindex]]);
                     }
 
                     webgl_param_value = "[" + webgl_param_value + "]";
                 }
                 else {
-                    webgl_param_value = render_context.getParameter(render_context[webgl_params[webg_param_index]]),
-                        null === webgl_param_value
-                            ? webgl_param_value = "n/a"
-                            : "object" == typeof webgl_param_value
-                            && null != webgl_param_value
-                            && (webgl_param_value = expandParamPair(webgl_param_value));
-                    $("#f" + webg_param_index).text(webgl_param_value)
+                    webgl_param_value = render_context.getParameter(render_context[webgl_params[webgl_param_index]]);
+
+                    if(null === webgl_param_value){
+                        webgl_param_value = "n/a";
+                    }
+                    else {
+                        if("object" === typeof webgl_param_value && null != webgl_param_value){
+                            webgl_param_value = expandParamPair(webgl_param_value);
+                        }
+                    }
+
+                    $("#f" + webgl_param_index).text(webgl_param_value);
                 }
 
                 if(DEBUG){
-                    console.log(webgl_params[webg_param_index] + " = " + webgl_param_value);
+                    console.log(webgl_params[webgl_param_index] + " = " + webgl_param_value);
                 }
             }
 
-            var N = "";
-            for (var i in supported_webgl_implementations) {
-                if ("" != N){
-                    N += ", ";
+            let webgl_implementations_html = "";
+            for (let impl_idx in supported_webgl_implementations) {
+                if ("" != webgl_implementations_html){
+                    webgl_implementations_html += ", ";
                 }
-                if (supported_webgl_implementations[i] != webgl_impl.name[0]) {
-                    N += '<span class="href" id="switch-'
-                        + supported_webgl_implementations[i]
+                if (supported_webgl_implementations[impl_idx] != webgl_impl.name[0]) {
+                    webgl_implementations_html += '<span class="href" id="switch-'
+                        + supported_webgl_implementations[impl_idx]
                         + '" title="switch to &quot;'
-                        + supported_webgl_implementations[i]
+                        + supported_webgl_implementations[impl_idx]
                         + '&quot;">';
 
                 }
                 else if (supported_webgl_implementations.length > 1) {
-                    N += "<strong>";
+                    webgl_implementations_html += "<strong>";
                 }
-                N += supported_webgl_implementations[i];
-                if (supported_webgl_implementations[i] != webgl_impl.name[0]) {
-                    N += "</span>";
+                webgl_implementations_html += supported_webgl_implementations[impl_idx];
+                if (supported_webgl_implementations[impl_idx] != webgl_impl.name[0]) {
+                    webgl_implementations_html += "</span>";
                 }
                 else if (supported_webgl_implementations.length > 1) {
-                    N += "</strong>";
+                    webgl_implementations_html += "</strong>";
                 }
             }
 
-            $("#f_name").html(N);
+            $("#f_name").html(webgl_implementations_html);
 
             if (DEBUG) {
                 t4 = performance.now();
                 console.log("t4-t3 = ", t4 - t3, "ms");
             }
 
-            for (var i in supported_webgl_implementations) {
-                $("#switch-" + supported_webgl_implementations[i]).click(function (event) {
+            for (let impl_idx in supported_webgl_implementations) {
+                $("#switch-" + supported_webgl_implementations[impl_idx]).click(function (event) {
                     event.preventDefault();
                     $(this).off("click");
                     renderWebglTable($(this).attr("id").slice(7), supported_webgl_implementations);
@@ -331,14 +349,14 @@ $(function () {
             }
 
             $("#f_alias").text(getAntialiasing(render_context));
-            var debug_renderer_info = debugRendererInfo(render_context);
+            let debug_renderer_info = debugRendererInfo(render_context);
 
             $("#u_vendor").html(debug_renderer_info.vendor)
                 , $("#u_renderer").html(debug_renderer_info.renderer)
                 , $("#f_angle").text(getANGLE(render_context))
                 , $("#f_anisotropy").text(getAnisotropy(render_context))
                 , $("#f_caveat").text(getMajorPerformanceCaveat(webgl_impl.name[0]))
-                , 1 == maximum_webgl_version && $("#f_max_draw_buffers").text(getMaxDrawBuffers(render_context))
+                , (1 === maximum_webgl_version) && $("#f_max_draw_buffers").text(getMaxDrawBuffers(render_context))
                 , $("#f_float_int").text(getFloatIntPrecision(render_context))
                 , $("#f_ext").html(getWebGLExtensionsWithLinks(render_context))
                 , $("#f_vertext").html(describePrecision(render_context, render_context.VERTEX_SHADER))
