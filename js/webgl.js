@@ -209,9 +209,9 @@ $(function () {
                 }
             }
 
-            if (webgl_implementation == false) {
+            if (webgl_implementation === false) {
                 let extensions_list_str = "";
-                $("#webgl-table td:nth-child(2)").each(function (a) {
+                $("#webgl-table td:nth-child(2)").each(function () {
                     extensions_list_str = $(this).text();
                     if (extensions_list_str.length && "n/a" !== extensions_list_str){
                         $(this).prev().attr("title", extensions_list_str);
@@ -295,11 +295,13 @@ $(function () {
                         webgl_param_value = "n/a";
                     }
                     else {
-                        if("object" === typeof webgl_param_value && null != webgl_param_value){
-                            webgl_param_value = expandParamPair(webgl_param_value);
+                        if(("object" === typeof webgl_param_value) && (null !== webgl_param_value)){
+                            let webgl_pair_param = expandParamPair(webgl_param_value);
+                            webgl_param_value = webgl_pair_param;
                         }
                     }
 
+                    // WebGL context info, render to HTML
                     $("#f" + webgl_param_index).text(webgl_param_value);
                 }
 
@@ -348,8 +350,8 @@ $(function () {
                 });
             }
 
-            $("#f_alias").text(getAntialiasing(render_context));
-            let debug_renderer_info = debugRendererInfo(render_context);
+            $("#f_alias").text(getAntialiasingString(render_context));
+            let debug_renderer_info = htmlRendererInfo(render_context);
 
             $("#u_vendor").html(debug_renderer_info.vendor)
                 , $("#u_renderer").html(debug_renderer_info.renderer)
@@ -456,53 +458,59 @@ $(function () {
     }
 
     /// @function: expandParamPair
-    /// @param: pair_param
+    /// @param pair_param: Float32Array of 2 elements
+    /// @return: String formatted like "[%1, %2]"
     function expandParamPair(pair_param) {
         return null == pair_param ? "null" : "[" + pair_param[0] + ", " + pair_param[1] + "]"
     }
 
-    /// @function: getAntialiasing
-    /// @param: gl
-    function getAntialiasing(gl) {
-        var b = false;
+    /// @function: getAntialiasingString
+    /// @param render_ctx: WebGL rendering context
+    /// @return: String representing Boolean, i.e. "True" or "False"
+    function getAntialiasingString(render_ctx) {
+        let bool_2_string = false;
         try {
-            b = gl.getContextAttributes().antialias
+            bool_2_string = render_ctx.getContextAttributes().antialias
         }
         catch (exc) {
             if (DEBUG) {
-                console.warn("getAntialiasing", exc);
+                console.warn("getAntialiasingString", exc);
             }
         }
-        return b ? "True" : "False"
+        return bool_2_string ? "True" : "False"
     }
 
-    /// @function: debugRendererInfo
-    /// @param: gl
-    function debugRendererInfo(gl) {
-        var b = '<span class="bad">!</span> ', 
-            c = {renderer: "n/gl", vendor: "n/gl"},
-            d = gl.getExtension("WEBGL_debug_renderer_info");
-        return null != d && (c.renderer = b + gl.getParameter(d.UNMASKED_RENDERER_WEBGL),
-            c.vendor = b + gl.getParameter(d.UNMASKED_VENDOR_WEBGL)),
-            c;
+    /// @function: htmlRendererInfo
+    /// @param render_ctx: WebGL rendering context
+    /// @return: Object containing HTML strings for renderer and vendor
+    function htmlRendererInfo(render_ctx) {
+        let html_prefix = '<span class="bad">!</span> ';
+        let renderer_html_info = {renderer: "n/render_ctx", vendor: "n/render_ctx"};
+        let webgl_renderer_info = render_ctx.getExtension("WEBGL_debug_renderer_info");
+        if(null != webgl_renderer_info) {
+            renderer_html_info.renderer = html_prefix + render_ctx.getParameter(webgl_renderer_info.UNMASKED_RENDERER_WEBGL);
+        }
+        renderer_html_info.vendor = html_prefix + render_ctx.getParameter(webgl_renderer_info.UNMASKED_VENDOR_WEBGL);
+        return renderer_html_info;
     }
 
     /// @function: getANGLE
     /// ANGLE - Almost Native Graphics Layer Engine
-    /// @param: gl
-    function getANGLE(gl) {
+    /// See details at: https://chromium.googlesource.com/angle/angle/+/master/README.md
+    /// @param render_ctx: WebGL rendering context
+    function getANGLE(render_ctx) {
 
         function b(a) {
-            return 0 !== a && 0 == (a & a - 1)
+            return 0 !== a && 0 === (a & a - 1);
         }
 
-        var c = expandParamPair(gl.getParameter(gl.ALIASED_LINE_WIDTH_RANGE));
+        var c = expandParamPair(render_ctx.getParameter(render_ctx.ALIASED_LINE_WIDTH_RANGE));
         return "Win32" !== navigator.platform
         && "Win64" !== navigator.platform
-        || "Internet Explorer" === gl.getParameter(gl.RENDERER)
-        || "Microsoft Edge" === gl.getParameter(gl.RENDERER)
-        || c !== expandParamPair([1, 1]) ? "False" : b(gl.getParameter(gl.MAX_VERTEX_UNIFORM_VECTORS))
-        && b(gl.getParameter(gl.MAX_FRAGMENT_UNIFORM_VECTORS)) ? "True, Direct3D 11" : "True, Direct3D 9";
+        || "Internet Explorer" === render_ctx.getParameter(render_ctx.RENDERER)
+        || "Microsoft Edge" === render_ctx.getParameter(render_ctx.RENDERER)
+        || c !== expandParamPair([1, 1]) ? "False" : b(render_ctx.getParameter(render_ctx.MAX_VERTEX_UNIFORM_VECTORS))
+        && b(render_ctx.getParameter(render_ctx.MAX_FRAGMENT_UNIFORM_VECTORS)) ? "True, Direct3D 11" : "True, Direct3D 9";
     }
 
     /// @function: getAnisotropy
@@ -511,6 +519,7 @@ $(function () {
         var b = gl.getExtension("EXT_texture_filter_anisotropic")
                 || gl.getExtension("WEBKIT_EXT_texture_filter_anisotropic")
                 || gl.getExtension("MOZ_EXT_texture_filter_anisotropic");
+
         if (b) {
             var c = gl.getParameter(b.MAX_TEXTURE_MAX_ANISOTROPY_EXT);
             return 0 === c && (c = 2), c
@@ -684,7 +693,9 @@ $(function () {
     (function () {
 
         setTimeout(function () {
-            var canvas, ctx, width = 256, height = 128;  // var a;
+            var canvas, ctx;
+            const width = 256;
+            const height = 128;  // var a;
             try {
                 canvas = document.createElement("canvas");  // var b = document.createElement("canvas");
                 canvas.width = width;
@@ -721,10 +732,10 @@ $(function () {
                 d.itemSize = 3;
                 d.numItems = 3;
                 
-                var f = ctx.createProgram(),
-                    vtx_shader = ctx.createShader(ctx.VERTEX_SHADER);
+                var f = ctx.createProgram();
+                var vtx_shader = ctx.createShader(ctx.VERTEX_SHADER);
 
-                ctx.shaderSource(vtx_shader, 
+                ctx.shaderSource(vtx_shader,
                     "attribute vec2 attrVertex;" +
                     "varying vec2 varyinTexCoordinate;" +
                     "uniform vec2 uniformOffset;" +
@@ -736,7 +747,7 @@ $(function () {
                 ctx.compileShader(vtx_shader);
 
                 var frag_shader = ctx.createShader(ctx.FRAGMENT_SHADER);
-                ctx.shaderSource(frag_shader, 
+                ctx.shaderSource(frag_shader,
                     "precision mediump float;" + 
                     "varying vec2 varyinTexCoordinate;" +
                     "void main(){" + 
@@ -764,9 +775,10 @@ $(function () {
             }
 
             var img_fingerprint = "";
-
             try {
-                var j = new Uint8Array(131072);
+                // 256x128 is size, 4 bytes for RGBA
+                const picture_webgl_size = 256*128*4;
+                var j = new Uint8Array(picture_webgl_size);
                 ctx.readPixels(0, 0, 256, 128, ctx.RGBA, ctx.UNSIGNED_BYTE, j);
                 img_fingerprint = JSON.stringify(j).replace(/,?"[0-9]+":/g, "");
                 if (img_fingerprint.replace(/^{[0]+}$/g, "") == "") {
