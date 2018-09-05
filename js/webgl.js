@@ -302,10 +302,9 @@ $(function () {
                             webgl_param_value = webgl_pair_param;
                         }
                     }
-
                 }
 
-                // WebGL context info, render to HTML
+                // WebGL context info, render to HTML table
                 $("#f" + webgl_param_index).text(webgl_param_value);
 
                 if(DEBUG){
@@ -356,17 +355,23 @@ $(function () {
             $("#f_alias").text(getAntialiasingString(render_context));
             let debug_renderer_info = htmlRendererInfo(render_context);
 
-            $("#u_vendor").html(debug_renderer_info.vendor)
-                , $("#u_renderer").html(debug_renderer_info.renderer)
-                , $("#f_angle").text(getANGLE(render_context))
-                , $("#f_anisotropy").text(getAnisotropy(render_context))
-                , $("#f_caveat").text(getMajorPerformanceCaveat(webgl_impl.name[0]))
-                , (1 === maximum_webgl_version) && $("#f_max_draw_buffers").text(getMaxDrawBuffers(render_context))
-                , $("#f_float_int").text(getFloatIntPrecision(render_context))
-                , $("#f_ext").html(getWebGLExtensionsWithLinks(render_context))
-                , $("#f_vertext").html(describePrecision(render_context, render_context.VERTEX_SHADER))
-                , $("#f_fragment").html(describePrecision(render_context, render_context.FRAGMENT_SHADER))
-                , $(".ext-link").each(function () {
+            $("#u_vendor").html(debug_renderer_info.vendor);
+            $("#u_renderer").html(debug_renderer_info.renderer);
+            $("#f_angle").text(getANGLE(render_context));
+            $("#f_anisotropy").text(getAnisotropy(render_context));
+            $("#f_caveat").text(getMajorPerformanceCaveat(webgl_impl.name[0]));
+
+            if(1 === maximum_webgl_version) {
+                $("#f_max_draw_buffers").text(getMaxDrawBuffers(render_context));
+            }
+
+            $("#f_float_int").text(getFloatIntPrecision(render_context));
+            $("#f_ext").html(getWebGLExtensionsWithLinks(render_context));
+            $("#f_vertext").html(describePrecision(render_context, render_context.VERTEX_SHADER));
+            $("#f_fragment").html(describePrecision(render_context, render_context.FRAGMENT_SHADER));
+
+            // Hover extension handlers
+            $(".ext-link").each(function () {
 
                 $(this).on("mouseover", function () {
 
@@ -384,11 +389,19 @@ $(function () {
                             ? ext_link += " — "
                             : "") + 'WebGL Extension Specification" rel="noopener nofollow" target="_blank">'
                         + a
-                        + "</a>")
+                        + "</a>");
                 })
-                }), window.location.hash && !webgl_implementation && clck(), 1 == maximum_webgl_version
+            });
+
+            if(window.location.hash && !webgl_implementation) {
+                // plugins.js
+                clck();
+            }
+
+            1 === maximum_webgl_version
                 ? $(".w1").addClass("w1only")
-                : 2 == maximum_webgl_version && $(".w2").addClass("w2only"), destroyWebgl(render_context);
+                : 2 === maximum_webgl_version && $(".w2").addClass("w2only");
+            destroyWebgl(render_context);
         }
         else {
             $("#webgl-table").removeClass("script").addClass("opac");
@@ -406,16 +419,18 @@ $(function () {
             : ""));
 
         if (maximum_webgl_version && "" !== webgl2_support_functions) {
-            var R = $("#webgl2-status input"),
-                S = $("#webgl2-tbody");
-            R.click(function (a) {
-                if (R.attr("value") == "more") {
-                    R.attr("value", "less");
-                    S.removeClass("n");
+            let webgl2_td_html = $("#webgl2-status input");
+            let webgl2_expanded_html = $("#webgl2-tbody");
+
+            // Expand list of supported functions
+            webgl2_td_html.click(function (a) {
+                if (webgl2_td_html.attr("value") == "more") {
+                    webgl2_td_html.attr("value", "less");
+                    webgl2_expanded_html.removeClass("n");
                 }
                 else {
-                    R.attr("value", "more");
-                    S.addClass("n");
+                    webgl2_td_html.attr("value", "more");
+                    webgl2_expanded_html.addClass("n");
                 }
             }).parent().addClass("webgl2-more-func");
         }
@@ -428,23 +443,22 @@ $(function () {
     }
 
     /// @function: webglDetect
-    /// @return: Object { gl: WebGL context, name: array of supported WebGL implementation names}
+    /// @return: Object {gl: WebGL context, name: array of supported WebGL implementation names}
     function webglDetect() {
 
-        var gl_implementations = [
-            "webgl2", "experimental-webgl2", "webgl", "experimental-webgl",
-            "moz-webgl", "fake-webgl"
+        const gl_implementations = [
+            "webgl2", "experimental-webgl2", "webgl", "experimental-webgl", "moz-webgl", "fake-webgl"
         ];
 
         let supported_implementations = [];
         let ctx = false;
-        let impl_ctx = false;
+        let impl_ctx = ctx;
 
         for (let index in gl_implementations) {
             impl_ctx = false;
             try {
-                impl_ctx = document.createElement("canvas")
-                                   .getContext(gl_implementations[index], {stencil: true});
+                impl_ctx = document.createElement("canvas").getContext(gl_implementations[index], {stencil: true});
+
                 if (impl_ctx){
                     if (ctx) {
                         destroyWebgl(impl_ctx);
@@ -461,12 +475,12 @@ $(function () {
                 }
             }
         }
-        return !!ctx && { name: supported_implementations, gl: ctx}
+        return !!ctx && {name: supported_implementations, gl: ctx}
     }
 
     /// @function: expandParamPair
     /// @param pair_param: Float32Array of 2 elements
-    /// @return: String formatted like "[%1, %2]"
+    /// @return: String formatted like "[%1, %2]" or "null" string
     function expandParamPair(pair_param) {
         return null == pair_param ? "null" : "[" + pair_param[0] + ", " + pair_param[1] + "]"
     }
@@ -511,7 +525,7 @@ $(function () {
             return 0 !== a && 0 === (a & a - 1);
         }
 
-        var c = expandParamPair(render_ctx.getParameter(render_ctx.ALIASED_LINE_WIDTH_RANGE));
+        let c = expandParamPair(render_ctx.getParameter(render_ctx.ALIASED_LINE_WIDTH_RANGE));
         return "Win32" !== navigator.platform
         && "Win64" !== navigator.platform
         || "Internet Explorer" === render_ctx.getParameter(render_ctx.RENDERER)
@@ -529,7 +543,7 @@ $(function () {
 
         if (b) {
             var c = gl.getParameter(b.MAX_TEXTURE_MAX_ANISOTROPY_EXT);
-            return 0 === c && (c = 2), c
+            return 0 === c && (c = 2), c;
         }
         return "n/a"
     }
