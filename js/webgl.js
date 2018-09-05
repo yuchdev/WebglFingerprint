@@ -45,6 +45,7 @@ $(function () {
         if (window.WebGL2RenderingContext){
             webgl_2_status = GL_SUPPORTED;
         }
+
         let is_webgl2_supported = !!window.WebGL2RenderingContext;
         let webgl_impl = webglDetect();
 
@@ -191,6 +192,7 @@ $(function () {
 
                     let gl_function_name = WEBGL_FUNCTIONS[func_idx];
                     let html_table_row = $("#n" + func_idx);
+
                     if (render_context[gl_function_name]){
                         supported_gl_functions_count++;
                         html_table_row.html(ICON_SUPPORTED + "True");
@@ -301,9 +303,10 @@ $(function () {
                         }
                     }
 
-                    // WebGL context info, render to HTML
-                    $("#f" + webgl_param_index).text(webgl_param_value);
                 }
+
+                // WebGL context info, render to HTML
+                $("#f" + webgl_param_index).text(webgl_param_value);
 
                 if(DEBUG){
                     console.log(webgl_params[webgl_param_index] + " = " + webgl_param_value);
@@ -312,10 +315,10 @@ $(function () {
 
             let webgl_implementations_html = "";
             for (let impl_idx in supported_webgl_implementations) {
-                if ("" != webgl_implementations_html){
+                if ("" !== webgl_implementations_html){
                     webgl_implementations_html += ", ";
                 }
-                if (supported_webgl_implementations[impl_idx] != webgl_impl.name[0]) {
+                if (supported_webgl_implementations[impl_idx] !== webgl_impl.name[0]) {
                     webgl_implementations_html += '<span class="href" id="switch-'
                         + supported_webgl_implementations[impl_idx]
                         + '" title="switch to &quot;'
@@ -368,8 +371,8 @@ $(function () {
                 $(this).on("mouseover", function () {
 
                     $(this).off();
-                    var ext_link;
-                    var a = ext_link = $(this).first().text();
+                    let ext_link;
+                    let a = ext_link = $(this).first().text();
                     "WEBKIT_lose_context" === ext_link
                         ? ext_link = "WEBGL_lose_context"
                         : "WEBKIT_WEBGL_compressed_textures" === ext_link && (ext_link = "")
@@ -385,7 +388,7 @@ $(function () {
                 })
                 }), window.location.hash && !webgl_implementation && clck(), 1 == maximum_webgl_version
                 ? $(".w1").addClass("w1only")
-                : 2 == maximum_webgl_version && $(".w2").addClass("w2only"), destroyWebgl(render_context)
+                : 2 == maximum_webgl_version && $(".w2").addClass("w2only"), destroyWebgl(render_context);
         }
         else {
             $("#webgl-table").removeClass("script").addClass("opac");
@@ -398,15 +401,19 @@ $(function () {
         }
 
         $("#webgl1-status").html(HTML_VALUE_MAP[webgl_1_status]);
-        $("#webgl2-status").html(HTML_VALUE_MAP[webgl_2_status] + (1 == webgl_2_status ? webgl2_support_functions : ""));
-        if (maximum_webgl_version && "" != webgl2_support_functions) {
+        $("#webgl2-status").html(HTML_VALUE_MAP[webgl_2_status] + (1 === webgl_2_status
+            ? webgl2_support_functions
+            : ""));
+
+        if (maximum_webgl_version && "" !== webgl2_support_functions) {
             var R = $("#webgl2-status input"),
                 S = $("#webgl2-tbody");
             R.click(function (a) {
                 if (R.attr("value") == "more") {
                     R.attr("value", "less");
                     S.removeClass("n");
-                } else {
+                }
+                else {
                     R.attr("value", "more");
                     S.addClass("n");
                 }
