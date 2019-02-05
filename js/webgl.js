@@ -355,6 +355,7 @@ $(function () {
             $("#f_alias").text(getAntialiasingString(render_context));
             let debug_renderer_info = htmlRendererInfo(render_context);
 
+            // render html
             $("#u_vendor").html(debug_renderer_info.vendor);
             $("#u_renderer").html(debug_renderer_info.renderer);
             $("#f_angle").text(getANGLE(render_context));
