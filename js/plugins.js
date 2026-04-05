@@ -1,224 +1,363 @@
-/* js-cookie v2.2.0 | MIT */
-!function (a) {
-    var b = !1;
-    if ("function" == typeof define
-        && define.amd
-        && (define(a), b = !0), "object" == typeof exports
-        && (module.exports = a(), b = !0), !b) {
+/**
+ * Modernized plugins.js
+ */
 
-        var c = window.Cookies, d = window.Cookies = a();
-        d.noConflict = function () {
-            return window.Cookies = c, d
-        }
-    }
-}
-(function () {
+const Cookies = (function () {
+    'use strict';
 
-    function a() {
-        for (var a = 0, b = {}; a < arguments.length; a++) {
-            var c = arguments[a];
-            for (var d in c) {
-                b[d] = c[d]
+    function extend() {
+        let result = {};
+        for (let i = 0; i < arguments.length; i++) {
+            let attributes = arguments[i];
+            for (let key in attributes) {
+                result[key] = attributes[key];
             }
         }
-        return b
+        return result;
     }
 
-    function b(c) {
+    function init(converter) {
+        function api(key, value, attributes) {
+            if (typeof document === 'undefined') {
+                return;
+            }
 
-        function d(b, e, f) {
+            // Write
+            if (arguments.length > 1) {
+                attributes = extend({ path: '/' }, api.defaults, attributes);
 
-            var g;
-            if ("undefined" != typeof document) {
-
-                if (arguments.length > 1) {
-
-                    if ("number" == typeof (f = a({ path: "/" }, d.defaults, f)).expires) {
-                        var h = new Date;
-                        h.setMilliseconds(h.getMilliseconds() + 864e5 * f.expires), f.expires = h
-                    }
-
-                    f.expires = f.expires
-                        ? f.expires.toUTCString()
-                        : "";
-
-                    try {
-                        g = JSON.stringify(e), /^[\{\[]/.test(g) && (e = g)
-                    }
-                    catch (a) {
-                        // suppress exception
-                    }
-                    e = c.write
-
-                    ? c.write(e, b)
-                    : encodeURIComponent(e + "")
-                        .replace(/%(23|24|26|2B|3A|3C|3E|3D|2F|3F|40|5B|5D|5E|60|7B|7D|7C)/g, decodeURIComponent)
-                            , b = (b = (b = encodeURIComponent(b + ""))
-                        .replace(/%(23|24|26|2B|5E|60|7C)/g, decodeURIComponent))
-                        .replace(/[\(\)]/g, escape);
-                    
-                    var i = "";
-
-                    for (var j in f) 
-                        f[j] && (i += "; " + j, !0 !== f[j] && (i += "=" + f[j]));
-
-                    return document.cookie = b + "=" + e + i
-                } // if(arguments.length>1)
-
-                b || (g = {});
-
-                for (var k = document.cookie
-                    ? document.cookie.split("; ")
-                    : [], l = /(%[0-9A-Z]{2}) + /g, m = 0; m < k.length; m++) {
-
-                    var n = k[m].split("="), o = n.slice(1).join("=");
-                    this.json || '"' !== o.charAt(0) || (o = o.slice(1, -1));
-
-                    try {
-                        var p = n[0].replace(l, decodeURIComponent);
-                        if (o = c.read ? c.read(o, p) : c(o, p) || o.replace(l, decodeURIComponent), this.json) {
-
-                            try {
-                                o = JSON.parse(o)
-                            }
-                            catch (a) { }
-                        }
-
-                        if (b === p) {
-                            g = o;
-                            break;
-                        }
-                        b || (g[p] = o)
-                    }
-                    catch (a) { }
+                if (typeof attributes.expires === 'number') {
+                    let expires = new Date();
+                    expires.setMilliseconds(expires.getMilliseconds() + attributes.expires * 864e5);
+                    attributes.expires = expires;
                 }
-                return g
-            }
-        }
-        return d.set = d, d.get = function (a) {
 
-            return d.call(d, a)
+                attributes.expires = attributes.expires ? attributes.expires.toUTCString() : '';
 
-        }
-        , d.getJSON = function () {
-                return d.apply({ json: !0 }, [].slice.call(arguments))
-            }
-            , d.defaults = {}, d.remove = function (b, c) {
-                d(b, "", a(c, { expires: -1 }))
-            }
-            , d.withConverter = b, d
-        }
-    return b(function () { })
-});
+                try {
+                    let result = JSON.stringify(value);
+                    if (/^[\{\[]/.test(result)) {
+                        value = result;
+                    }
+                } catch (e) {}
 
-/* https://browserleaks.com/js/plugins.js */
+                value = converter.write
+                    ? converter.write(value, key)
+                    : encodeURIComponent(String(value)).replace(
+                          /%(23|24|26|2B|3A|3C|3E|3D|2F|3F|40|5B|5D|5E|60|7B|7D|7C)/g,
+                          decodeURIComponent
+                      );
+
+                key = encodeURIComponent(String(key))
+                    .replace(/%(23|24|26|2B|5E|60|7C)/g, decodeURIComponent)
+                    .replace(/[\(\)]/g, escape);
+
+                let stringifiedAttributes = '';
+                for (let attributeName in attributes) {
+                    if (!attributes[attributeName]) {
+                        continue;
+                    }
+                    stringifiedAttributes += '; ' + attributeName;
+                    if (attributes[attributeName] === true) {
+                        continue;
+                    }
+                    stringifiedAttributes += '=' + attributes[attributeName].split(';')[0];
+                }
+
+                return (document.cookie = key + '=' + value + stringifiedAttributes);
+            }
+
+            // Read
+            let result = key ? undefined : {};
+            let cookies = document.cookie ? document.cookie.split('; ') : [];
+            let rdecode = /(%[0-9A-Z]{2})+/g;
+
+            for (let i = 0; i < cookies.length; i++) {
+                let parts = cookies[i].split('=');
+                let cookie = parts.slice(1).join('=');
+
+                if (cookie.charAt(0) === '"') {
+                    cookie = cookie.slice(1, -1);
+                }
+
+                try {
+                    let name = parts[0].replace(rdecode, decodeURIComponent);
+                    cookie = (converter.read || converter)(cookie, name) || cookie.replace(rdecode, decodeURIComponent);
+
+                    if (api.json) {
+                        try {
+                            cookie = JSON.parse(cookie);
+                        } catch (e) {}
+                    }
+
+                    if (key === name) {
+                        result = cookie;
+                        break;
+                    }
+
+                    if (!key) {
+                        result[name] = cookie;
+                    }
+                } catch (e) {}
+            }
+
+            return result;
+        }
+
+        api.set = api;
+        api.get = (key) => api.call(api, key);
+        api.getJSON = function () {
+            return api.apply({ json: true }, [].slice.call(arguments));
+        };
+        api.defaults = {};
+        api.remove = (key, attributes) => api(key, '', extend(attributes, { expires: -1 }));
+        api.withConverter = init;
+
+        return api;
+    }
+
+    return init(() => {});
+})();
+
+window.Cookies = Cookies;
+
 function clck(a) {
-    if (!location.hash.length)
-        return !1;
-    if (!new RegExp("^#[0-9a-zA-Z-+]+$").test(location.hash))
-        return console.warn(":("), history.replaceState(null, null, window.location.pathname), !1;
-    var b = $(location.hash);
-    b.length && b.hasClass("warn-help") && (void 0 !== a && b.click(), b[0].scrollIntoView())
+    if (!location.hash.length) return false;
+    if (!new RegExp('^#[0-9a-zA-Z-+]+$').test(location.hash)) {
+        console.warn(':(');
+        history.replaceState(null, null, window.location.pathname);
+        return false;
+    }
+    const b = document.querySelector(location.hash);
+    if (b && b.classList.contains('warn-help')) {
+        if (void 0 !== a) b.click();
+        b.scrollIntoView();
+    }
 }
 
-$(function () {
-    
-    function a(a) {
-        "function" == typeof history.replaceState 
-            && (a.length || (a = window.location.pathname), history.replaceState(null, null, a))
+document.addEventListener('DOMContentLoaded', () => {
+    function updateHash(hash) {
+        if (typeof history.replaceState === 'function') {
+            if (!hash.length) hash = window.location.pathname;
+            history.replaceState(null, null, hash);
+        }
     }
-    $("footer").on("mouseover", function () {
-        $("#bdo").text($("#bdo").text().split("").reverse().join("")), $("footer").off()
-    }), $(".code li:odd").addClass("odd");
 
-    var b = $(".warn-help");
+    const footer = document.querySelector('footer');
+    if (footer) {
+        const mouseOverHandler = () => {
+            const bdo = document.getElementById('bdo');
+            if (bdo) bdo.textContent = bdo.textContent.split('').reverse().join('');
+            footer.removeEventListener('mouseover', mouseOverHandler);
+        };
+        footer.addEventListener('mouseover', mouseOverHandler);
+    }
 
-    b.each(function () {
-        $(this).hasClass("warn-help-enabled") || $(this).next().toggleClass("none"), $(this).click(
-        function (c) {
-                
-            if (c.preventDefault()
-                , $(this).toggleClass("warn-help-enabled")
-                , $(this).next().toggleClass("none")
-                , $(this).hasClass("warn-help-enabled")) {
+    document.querySelectorAll('.code li:nth-child(odd)').forEach((el) => el.classList.add('odd'));
 
-                a("#" + $(this).attr("id"));
-            }
-            else {
+    const warnHelpElements = document.querySelectorAll('.warn-help');
 
-                a("");
-                var d, e = $(this).attr("id");
-                b.each(function () {
-                    if ((d = $(this).attr("id")) != e && $(this).hasClass("warn-help-enabled")) {
-                        return a("#" + d), !1
+    warnHelpElements.forEach((el) => {
+        if (!el.classList.contains('warn-help-enabled')) {
+            const nextEl = el.nextElementSibling;
+            if (nextEl) nextEl.classList.toggle('none');
+        }
+        el.addEventListener('click', function (e) {
+            e.preventDefault();
+            this.classList.toggle('warn-help-enabled');
+            const nextEl = this.nextElementSibling;
+            if (nextEl) nextEl.classList.toggle('none');
+
+            if (this.classList.contains('warn-help-enabled')) {
+                updateHash('#' + this.getAttribute('id'));
+            } else {
+                updateHash('');
+                const id = this.getAttribute('id');
+                warnHelpElements.forEach((innerEl) => {
+                    const innerId = innerEl.getAttribute('id');
+                    if (innerId !== id && innerEl.classList.contains('warn-help-enabled')) {
+                        updateHash('#' + innerId);
                     }
-                })
+                });
             }
-        })
-    })
-    , $(window).bind("hashchange", function () { clck(1) })
-    , clck(1)
-    , $(".twwt").attr("title", "Tweet this!").click(
-    function () {
-        window.open("https://twitter.com/intent/tweet?url="
-            + encodeURI(location.href)
-            + "&text="
-            + encodeURI(document.title)
-                , "tst"
-                , "scrollbars=0,resizable=1,menubar=0,toolbar=0,status=0,width=550,height=420,left="
-            + (screen.width ? screen.width / 2 - 275 : 100)
-            + ",top="
-            + (screen.height ? screen.height / 2 - 210 : 100))
+        });
     });
 
-    var c = ($(".ping"), $("#subject"));
-    ping = [ping >>> 24, ping >>> 16 & 255, ping >>> 8 & 255, 255 & ping].join("."), c.text() && $(".ping").val(c.text());
-    var d = $("body"), e = $("#nav-menu");
-    $("#nav-pin").click(function () {
-        var a = $("#nav-pin-submit"), b = $("#content"), c = $("#logo a"), f = $("#hand");
-        d.hasClass("pinned") ? (e.stop().animate({ width: "24px" }, 350), e.addClass("bs"), b.stop().animate({ marginLeft: "68px" }, 350), c.stop().animate({ marginLeft: "92px" }, 350), f.stop().fadeOut(350), a.attr("title", "Pin Menu"), d.removeClass("pinned"), Cookies.remove("bl_pinned")) : (e.stop().animate({ width: "200px" }, 350), e.removeClass("bs"), b.stop().animate({ marginLeft: "246px" }, 350), c.stop().animate({ marginLeft: "340px" }, 350), f.addClass("hand_img").stop().fadeIn(350), a.attr("title", "Unpin Menu"), d.addClass("pinned"), Cookies.set("bl_pinned", 1, { expires: 90 }))
-    })
-    , e.removeClass("css")
-    , $("#nav-hover").hover(function () { d.hasClass("pinned") || e.stop().animate({ width: "200px" }, 200) }
-    , function () { d.hasClass("pinned") || e.stop().animate({ width: "24px" }, 200) })
-    , $("#nav-hover a,#nav-hover span").on("focus"
-    , function () { d.hasClass("pinned") || e.stop().animate({ width: "200px" }, 200) })
-    , $("#nav-hover a,#nav-hover span").on("focusout"
-    , function () { d.hasClass("pinned") || e.stop().animate({ width: "24px" }, 200) });
-    
-    var f = $("#dsq_autoload_input"); 
-    Cookies.get("bl_dsq") 
-        ? f.prop("checked", !1) 
-        : f.prop("checked", !0), f.on("click",  function () {
-            $(this).prop("checked")
-                ? Cookies.remove("bl_dsq") 
-                : Cookies.set("bl_dsq", 1, { expires: 90 }) 
+    window.addEventListener('hashchange', () => clck(1));
+    clck(1);
+
+    document.querySelectorAll('.twwt').forEach((el) => {
+        el.setAttribute('title', 'Tweet this!');
+        el.addEventListener('click', () => {
+            window.open(
+                'https://twitter.com/intent/tweet?url=' +
+                    encodeURI(location.href) +
+                    '&text=' +
+                    encodeURI(document.title),
+                'tst',
+                'scrollbars=0,resizable=1,menubar=0,toolbar=0,status=0,width=550,height=420,left=' +
+                    (screen.width ? screen.width / 2 - 275 : 100) +
+                    ',top=' +
+                    (screen.height ? screen.height / 2 - 210 : 100)
+            );
+        });
+    });
+
+    const subject = document.getElementById('subject');
+    if (typeof ping !== 'undefined') {
+        const pingStr = [(ping >>> 24) & 255, (ping >>> 16) & 255, (ping >>> 8) & 255, ping & 255].join('.');
+        if (subject && subject.textContent) {
+            document.querySelectorAll('.ping').forEach((el) => (el.value = subject.textContent));
+        }
+    }
+
+    const body = document.body;
+    const navMenu = document.getElementById('nav-menu');
+    const navPin = document.getElementById('nav-pin');
+
+    if (navPin && navMenu) {
+        navPin.addEventListener('click', () => {
+            const navPinSubmit = document.getElementById('nav-pin-submit');
+            const content = document.getElementById('content');
+            const logoA = document.querySelector('#logo a');
+            const hand = document.getElementById('hand');
+
+            if (body.classList.contains('pinned')) {
+                navMenu.style.transition = 'width 0.35s';
+                navMenu.style.width = '24px';
+                navMenu.classList.add('bs');
+                if (content) {
+                    content.style.transition = 'margin-left 0.35s';
+                    content.style.marginLeft = '68px';
+                }
+                if (logoA) {
+                    logoA.style.transition = 'margin-left 0.35s';
+                    logoA.style.marginLeft = '92px';
+                }
+                if (hand) {
+                    hand.style.transition = 'opacity 0.35s';
+                    hand.style.opacity = '0';
+                    setTimeout(() => {
+                        if (hand.style.opacity === '0') hand.style.display = 'none';
+                    }, 350);
+                }
+                if (navPinSubmit) navPinSubmit.setAttribute('title', 'Pin Menu');
+                body.classList.remove('pinned');
+                Cookies.remove('bl_pinned');
+            } else {
+                navMenu.style.transition = 'width 0.35s';
+                navMenu.style.width = '200px';
+                navMenu.classList.remove('bs');
+                if (content) {
+                    content.style.transition = 'margin-left 0.35s';
+                    content.style.marginLeft = '246px';
+                }
+                if (logoA) {
+                    logoA.style.transition = 'margin-left 0.35s';
+                    logoA.style.marginLeft = '340px';
+                }
+                if (hand) {
+                    hand.style.display = 'block';
+                    hand.classList.add('hand_img');
+                    setTimeout(() => {
+                        hand.style.transition = 'opacity 0.35s';
+                        hand.style.opacity = '1';
+                    }, 10);
+                }
+                if (navPinSubmit) navPinSubmit.setAttribute('title', 'Unpin Menu');
+                body.classList.add('pinned');
+                Cookies.set('bl_pinned', 1, { expires: 90 });
+            }
+        });
+    }
+
+    if (navMenu) {
+        navMenu.classList.remove('css');
+        const navHover = document.getElementById('nav-hover');
+        if (navHover) {
+            navHover.addEventListener('mouseenter', () => {
+                if (!body.classList.contains('pinned')) {
+                    navMenu.style.transition = 'width 0.2s';
+                    navMenu.style.width = '200px';
+                }
             });
-    var g = $("#comments");
-    g.hasClass("comments-locked") || g.on("click", function () {
-        
-        if (1 == window.disqus) {
-            return !1;
+            navHover.addEventListener('mouseleave', () => {
+                if (!body.classList.contains('pinned')) {
+                    navMenu.style.transition = 'width 0.2s';
+                    navMenu.style.width = '24px';
+                }
+            });
         }
-        
-        a(""), g.addClass("comments-locked"), $.ajax({
-            url: "https://browserleaks.disqus.com/embed.js", dataType: "script", cache: !0 }
-        ).success(function (a) {
-            window.disqus = !0, g.off("click") 
-        }) 
-    })    
-    , $("#lookup-form form #data").keypress( function (a) {
-        if (13 == a.which) {
-            return $("#lookup-submit").click(), !1 
-        }
-    })
-    , $("#lookup-submit").on("click", function (a) {
-        var b = $.trim($("#data").val());
-        if (b == ping || "" == b) {
-            return a.preventDefault(), window.location.href = "/ip", !1;
-        }
-        $("#lookup-form").submit()
-    })
+        document.querySelectorAll('#nav-hover a, #nav-hover span').forEach((el) => {
+            el.addEventListener('focus', () => {
+                if (!body.classList.contains('pinned')) {
+                    navMenu.style.transition = 'width 0.2s';
+                    navMenu.style.width = '200px';
+                }
+            });
+            el.addEventListener('focusout', () => {
+                if (!body.classList.contains('pinned')) {
+                    navMenu.style.transition = 'width 0.2s';
+                    navMenu.style.width = '24px';
+                }
+            });
+        });
+    }
+
+    const dsqAutoloadInput = document.getElementById('dsq_autoload_input');
+    if (dsqAutoloadInput) {
+        dsqAutoloadInput.checked = !Cookies.get('bl_dsq');
+        dsqAutoloadInput.addEventListener('click', function () {
+            this.checked ? Cookies.remove('bl_dsq') : Cookies.set('bl_dsq', 1, { expires: 90 });
+        });
+    }
+
+    const comments = document.getElementById('comments');
+    if (comments && !comments.classList.contains('comments-locked')) {
+        comments.addEventListener('click', function handler() {
+            if (window.disqus === 1) return false;
+
+            updateHash('');
+            comments.classList.add('comments-locked');
+
+            fetch('https://browserleaks.disqus.com/embed.js', { cache: 'force-cache' })
+                .then((response) => response.text())
+                .then((scriptText) => {
+                    const script = document.createElement('script');
+                    script.text = scriptText;
+                    document.head.appendChild(script);
+                    window.disqus = true;
+                    comments.removeEventListener('click', handler);
+                });
+        });
+    }
+
+    const dataInput = document.querySelector('#lookup-form form #data');
+    if (dataInput) {
+        dataInput.addEventListener('keypress', (e) => {
+            if (e.which === 13) {
+                const submitBtn = document.getElementById('lookup-submit');
+                if (submitBtn) submitBtn.click();
+                e.preventDefault();
+                return false;
+            }
+        });
+    }
+
+    const lookupSubmit = document.getElementById('lookup-submit');
+    if (lookupSubmit) {
+        lookupSubmit.addEventListener('click', (e) => {
+            const dataEl = document.getElementById('data');
+            const val = dataEl ? dataEl.value.trim() : '';
+            if (typeof pingStr !== 'undefined' && (val === pingStr || val === '')) {
+                e.preventDefault();
+                window.location.href = '/ip';
+                return false;
+            }
+            const lookupForm = document.getElementById('lookup-form');
+            if (lookupForm) lookupForm.submit();
+        });
+    }
 });
 
 var x = "amp_js_init,xtsite,Xt_,ActOn,pbjs,adriver,adroll_,ct_tag,addthis,a2apage_init,"
